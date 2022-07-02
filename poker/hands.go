@@ -25,6 +25,9 @@ func (h Hand) ToString() string {
 }
 
 func ParseHand(handStr string) Hand {
+	if len(handStr) != 4 {
+		panic("hand must contain 4 symbols")
+	}
 	c1 := ParseCard(handStr[:2])
 	c2 := ParseCard(handStr[2:])
 	if !IsDistinct(c1, c2) {
@@ -36,7 +39,7 @@ func ParseHand(handStr string) Hand {
 func ParseWightedHand(handStr string) (Hand, float32) {
 	handWeightArr := strings.Split(handStr, ":")
 	var weight float32 = 1
-	if len(handStr) == 2 {
+	if len(handWeightArr) == 2 {
 		w, err := strconv.ParseFloat(handWeightArr[1], 32)
 		if err != nil {
 			panic(fmt.Sprintf("Weight format not correct: %v", handStr))

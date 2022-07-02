@@ -1,32 +1,57 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"go-poker-equity/equity"
 	"go-poker-equity/poker"
 )
 
-func printEquity(equityRange []equity.HandEquity) {
-	for _, hand := range equityRange {
-		fmt.Printf("%s\n", hand.ToString())
+type EquityResultModel struct {
+	Equity     map[string]equity.Equity `json:"equity"`
+	TimeDelta  float32                  `json:"time_delta"`
+	Iterations uint32                   `json:"iterations"`
+}
+
+func printResults(result equity.ResultData) {
+	outputModel := EquityResultModel{}
+	outputModel.Equity = make(map[string]equity.Equity)
+	outputModel.Iterations = result.Iterations
+	outputModel.TimeDelta = result.TimeDelta
+	for key := range result.Equity {
+		outputModel.Equity[key.ToString()] = result.Equity[key]
 	}
+	resultJson, err := json.Marshal(&outputModel)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(resultJson))
 }
 
 func main() {
+	var iterations = flag.Int("iter", 0, "iterations count (0 for unlimited)")
+	var timeout = flag.Float64("timeout", 1, "timeout in seconds (fractional)")
 	flag.Parse()
 	if flag.NArg() < 3 {
 		panic("must be specified at least board and two ranges")
 	}
-	var iterations = flag.Int("n", 1234, "iterations count")
-	if *iterations <= 0 {
-		panic("iterations must me grater then zero")
+
+	if *iterations < 0 {
+		panic("iterations must me grater or equal zero")
 	}
 	board := poker.ParseBoard(flag.Args()[0])
 	var ranges []poker.Range
 	for _, rangeStr := range flag.Args()[1:] {
 		ranges = append(ranges, poker.ParseRange(rangeStr))
 	}
-	equityRange := equity.CalculateEquity(board, ranges[0], ranges[1:], uint32(*iterations))
-	printEquity(equityRange)
+	params := equity.RequestParams{
+		Board:      board,
+		MyRange:    ranges[0],
+		OppRanges:  ranges[1:],
+		Iterations: uint32(*iterations),
+		Timeout:    float32(*timeout),
+	}
+	result := equity.CalculateEquity(&params)
+	printResults(result)
 }

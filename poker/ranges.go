@@ -14,11 +14,11 @@ type RangeIterator struct {
 }
 
 func (iter *RangeIterator) Next() (h Hand, weight float32, end bool) {
-	for i := iter.hand; uint16(i) < rangeLen; i++ {
-		iter.hand++
+	for ; uint16(iter.hand) < rangeLen; iter.hand++ {
 		if iter.r[iter.hand] > 0 {
 			h = iter.hand
 			weight = iter.r[h]
+			iter.hand++
 			return
 		}
 	}

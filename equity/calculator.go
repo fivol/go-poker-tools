@@ -12,10 +12,11 @@ type equityCalculator struct {
 	choosers  []wr.Chooser
 	oppRanges []poker.Range
 	board     poker.Board
+	startMs   int64
 }
 
 func newEquityCalculator(board poker.Board, oppRanges *[]poker.Range) equityCalculator {
-	return equityCalculator{oppRanges: *oppRanges, board: board}
+	return equityCalculator{oppRanges: *oppRanges, board: board, startMs: time.Now().UnixMilli()}
 }
 
 func selectHand(chooser *wr.Chooser) poker.Hand {
@@ -26,7 +27,7 @@ func (c *equityCalculator) createOppRangesChoosers() {
 	for _, range_ := range c.oppRanges {
 		var choices []wr.Choice
 		iter := poker.NewRangeIterator(&range_)
-		for hand, weight, end := iter.Next(); !end; {
+		for hand, weight, end := iter.Next(); !end; hand, weight, end = iter.Next() {
 			choices = append(choices, wr.Choice{Item: hand, Weight: uint(weight * 1000)})
 		}
 		chooser, err := wr.NewChooser(choices...)
@@ -54,31 +55,50 @@ func (c *equityCalculator) iterHandWinCheck(hand poker.Hand) bool {
 	hands = append(hands, hand)
 	winners := combinations.DetermineWinners(c.board, hands)
 	for _, winner := range winners {
-		if winner == hand {
+		if winner == len(hands)-1 {
 			return true
 		}
 	}
 	return false
 }
 
-func (c *equityCalculator) calcHandEquity(hand poker.Hand, iterations uint32) Equity {
+func (c *equityCalculator) calcHandEquity(hand poker.Hand, params *RequestParams) (Equity, uint32) {
 	var winsCount uint32
-	for i := uint32(0); i < iterations; i++ {
+	var iterationsDone uint32
+	for i := uint32(0); params.Iterations == 0 || i < params.Iterations; i++ {
 		if c.iterHandWinCheck(hand) {
 			winsCount++
 		}
+		iterationsDone++
+		if i%100 == 0 {
+			if time.Now().UnixMilli()-c.startMs >= int64(params.Timeout*1000) {
+				break
+			}
+		}
 	}
-	return Equity(float32(winsCount) / float32(iterations))
+	return Equity(float32(winsCount) / float32(iterationsDone)), iterationsDone
 }
 
-func CalculateEquity(board poker.Board, myRange poker.Range, oppRanges []poker.Range, iterations uint32) []HandEquity {
-	initRandom()
-	calculator := newEquityCalculator(board, &oppRanges)
-	calculator.createOppRangesChoosers()
-	var equityRange []HandEquity
-	for hand, _ := range myRange {
-		equity := calculator.calcHandEquity(poker.Hand(hand), iterations)
-		equityRange = append(equityRange, HandEquity{Hand: poker.Hand(hand), Equity: equity})
+func addHandEquity(res *ResultData, hand poker.Hand, eq Equity, iterations uint32) {
+	res.Equity[hand] = eq
+	if res.Iterations == 0 {
+		res.Iterations = iterations
+	} else {
+		res.Iterations = (res.Iterations + iterations) / 2
 	}
-	return equityRange
+}
+
+func CalculateEquity(params *RequestParams) (res ResultData) {
+	res.Equity = make(map[poker.Hand]Equity)
+	initRandom()
+	calculator := newEquityCalculator(params.Board, &params.OppRanges)
+	calculator.createOppRangesChoosers()
+	iter := poker.NewRangeIterator(&params.MyRange)
+	for hand, _, end := iter.Next(); !end; hand, _, end = iter.Next() {
+		equity, iterations := calculator.calcHandEquity(hand, params)
+		addHandEquity(&res, hand, equity, iterations)
+	}
+	println(time.Now().UnixMilli(), calculator.startMs)
+	res.TimeDelta = float32(time.Now().UnixMilli()-calculator.startMs) / 1000
+	return
 }

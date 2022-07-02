@@ -3,6 +3,7 @@ package combinations
 import (
 	"github.com/stretchr/testify/assert"
 	"go-poker-equity/poker"
+	"sort"
 	"testing"
 )
 
@@ -28,8 +29,8 @@ func TestCombinationsCompare(t *testing.T) {
 			Combination{name: High, values: [5]uint8{13, 12, 11, 10, 1}},
 		},
 	}
-	for _, suitCase := range table {
-		assert.True(t, suitCase.big.GraterThen(suitCase.small), "Combinations compare failed")
+	for _, testCase := range table {
+		assert.True(t, testCase.big.GraterThen(testCase.small), "Combinations compare failed")
 	}
 }
 
@@ -42,134 +43,155 @@ func TestExtractors(t *testing.T) {
 		combination Combination
 	}{
 		{
-			FindHighComb,
+			findHighComb,
 			"AsAdAc",
 			"2h3d",
 			true,
-			Combination{name: High, values: [5]uint8{12, 0, 0, 0, 0}},
+			Combination{name: High, values: [5]uint8{12, 12, 12, 1, 0}},
 		},
 		{
-			FindHighComb,
+			findHighComb,
 			"2c3h9d",
 			"2h3d",
 			true,
-			Combination{name: High, values: [5]uint8{7, 0, 0, 0, 0}},
+			Combination{name: High, values: [5]uint8{7, 1, 1, 0, 0}},
 		},
 		{
-			FindHighComb,
+			findHighComb,
 			"2c3h9d",
 			"2hTd",
 			true,
-			Combination{name: High, values: [5]uint8{8, 0, 0, 0, 0}},
+			Combination{name: High, values: [5]uint8{8, 7, 1, 0, 0}},
 		},
 		{
-			FindPairComb,
+			findPairComb,
 			"AsAdAc",
 			"2h3d",
 			true,
-			Combination{name: Pair, values: [5]uint8{12, 0, 0, 0, 0}},
+			Combination{name: Pair, values: [5]uint8{12, 12, 12, 1, 0}},
 		},
 		{
-			FindSetComb,
+			findPairComb,
+			"Ts2dAc",
+			"2h3d",
+			true,
+			Combination{name: Pair, values: [5]uint8{0, 0, 12, 8, 1}},
+		},
+		{
+			findSetComb,
 			"AsAdAc",
 			"2h3d",
 			true,
-			Combination{name: Set, values: [5]uint8{12, 0, 0, 0, 0}},
+			Combination{name: Set, values: [5]uint8{12, 12, 12, 1, 0}},
 		},
 		{
-			FindSetComb,
+			findSetComb,
 			"AsAd3c",
 			"Ah3d",
 			true,
-			Combination{name: Set, values: [5]uint8{12, 0, 0, 0, 0}},
+			Combination{name: Set, values: [5]uint8{12, 12, 12, 1, 1}},
 		},
 		{
-			FindQuadsComb,
+			findQuadsComb,
 			"AsAdAc",
 			"2h3d",
 			false,
 			Combination{name: Set, values: [5]uint8{12, 0, 0, 0, 0}},
 		},
 		{
-			FindQuadsComb,
+			findQuadsComb,
 			"AsAdAc",
 			"2hAh",
 			true,
-			Combination{name: Quads, values: [5]uint8{12, 0, 0, 0, 0}},
+			Combination{name: Quads, values: [5]uint8{12, 12, 12, 12, 0}},
 		},
 		{
-			FindTwoPairsComb,
+			findTwoPairsComb,
 			"AsAdAc",
 			"2h2c",
 			true,
-			Combination{name: TwoPairs, values: [5]uint8{12, 0, 0, 0, 0}},
+			Combination{name: TwoPairs, values: [5]uint8{12, 12, 0, 0, 12}},
 		},
 		{
-			FindTwoPairsComb,
+			findTwoPairsComb,
 			"AsAdAc",
 			"2h3c",
 			false,
 			Combination{name: TwoPairs, values: [5]uint8{12, 0, 0, 0, 0}},
 		},
 		{
-			FindTwoPairsComb,
+			findTwoPairsComb,
 			"9s7cTd9c",
 			"6h6d",
 			true,
-			Combination{name: TwoPairs, values: [5]uint8{7, 4, 0, 0, 0}},
+			Combination{name: TwoPairs, values: [5]uint8{7, 7, 4, 4, 8}},
 		},
 		{
-			FindStraightComb,
+			findStraightComb,
 			"4c5c6c7c8c",
 			"2c3c",
 			true,
 			Combination{name: Straight, values: [5]uint8{6, 0, 0, 0, 0}},
 		},
 		{
-			FindStraightComb,
+			findStraightComb,
 			"4c5c6cTc8c",
 			"2c3c",
 			true,
 			Combination{name: Straight, values: [5]uint8{4, 0, 0, 0, 0}},
 		},
 		{
-			FindStraightComb,
+			findStraightComb,
 			"4c5cTcTd8c",
 			"2c3c",
 			false,
 			Combination{name: Straight, values: [5]uint8{4, 0, 0, 0, 0}},
 		},
 		{
-			FindStraightComb,
+			findStraightComb,
 			"4c5cTcTd8c",
 			"2c3c",
 			false,
 			Combination{name: Flush, values: [5]uint8{8, 6, 3, 2, 1}},
 		},
 		{
-			FindStraightFlushComb,
+			findStraightFlushComb,
 			"4c5cTcTd8c",
 			"2c3c",
 			false,
 			Combination{name: Flush, values: [5]uint8{8, 6, 3, 2, 1}},
 		},
 		{
-			FindStraightFlushComb,
+			findStraightFlushComb,
 			"4c5c6c7d8c",
 			"2c3c",
 			true,
 			Combination{name: StraightFlush, values: [5]uint8{4, 0, 0, 0, 0}},
 		},
+		{
+			findFullHouseComb,
+			"6d5c6cAdAc",
+			"2c6s",
+			true,
+			Combination{name: FullHouse, values: [5]uint8{4, 12, 0, 0, 0}},
+		},
+		{
+			findFullHouseComb,
+			"6d5c6cAdAc",
+			"2c5s",
+			false,
+			Combination{name: FullHouse, values: [5]uint8{4, 12, 0, 0, 0}},
+		},
 	}
-	for _, suitCase := range table {
-		board := poker.ParseBoard(suitCase.board)
-		hand := poker.ParseHand(suitCase.hand)
+	for _, testCase := range table {
+		board := poker.ParseBoard(testCase.board)
+		hand := poker.ParseHand(testCase.hand)
 		selector := newCombinationsSelector(board, hand)
 		selector.calcCardsEntry()
-		combination, found := suitCase.extractor(&selector)
-		assert.Equal(t, suitCase.found, found, "Combination found not match")
-		if suitCase.found {
-			assert.Equal(t, suitCase.combination, combination, "Combination not match")
+		combination, found := testCase.extractor(&selector)
+		assert.Equal(t, testCase.found, found, "Combination found not match")
+		if testCase.found {
+			assert.Equal(t, testCase.combination, combination, "Combination not match")
 		}
 	}
 	assert.Panics(t, func() {
@@ -182,10 +204,71 @@ func TestExtractors(t *testing.T) {
 
 func TestWinners(t *testing.T) {
 	table := []struct {
-		board       string
-		hand        string
-		found       bool
-		combination Combination
-	}{{}}
-	DetermineWinners()
+		board   string
+		hands   []string
+		winners []int
+	}{
+		{
+			"As9h8c4c3h",
+			[]string{"Ac2s", "9s2s"},
+			[]int{0},
+		},
+		{
+			"7s9h8c4c3h",
+			[]string{"9c8s", "5s6s"},
+			[]int{1},
+		},
+		{
+			"4s5s6s7s8s",
+			[]string{"Td9s", "3h2s", "Ac2h"},
+			[]int{0},
+		},
+		{
+			"4s5s6s7s8s",
+			[]string{"Td9c", "3h2s", "Ac2h"},
+			[]int{0, 1, 2},
+		},
+		{
+			"2s8d5dThQc",
+			[]string{"TsTc", "2c2h"},
+			[]int{0},
+		},
+		{
+			"2s8d5dThQc",
+			[]string{"AsAc", "2c2h"},
+			[]int{1},
+		},
+		{
+			"2s8d5dThQc",
+			[]string{"As3h", "Kc3d", "Ac4h"},
+			[]int{0, 2},
+		},
+		{
+			"2s8d5dThQc",
+			[]string{"As3h", "Kc3d", "Ac6h"},
+			[]int{2},
+		},
+		{
+			"2s8d5dThQc",
+			[]string{"2cKs", "Ts2h"},
+			[]int{1},
+		},
+		{
+			"2s8d5dThQc",
+			[]string{"2cKs", "As3h"},
+			[]int{0},
+		},
+	}
+	for _, testCase := range table {
+		board := poker.ParseBoard(testCase.board)
+		var hands []poker.Hand
+		for _, hand := range testCase.hands {
+			hands = append(hands, poker.ParseHand(hand))
+		}
+		winners := DetermineWinners(board, hands)
+		sort.Ints(winners)
+		sort.Ints(testCase.winners)
+		assert.Equal(t, testCase.winners, winners, "Winners sets does not match")
+	}
+
 }

@@ -2,6 +2,7 @@ package poker
 
 import (
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -51,5 +52,19 @@ func TestSuitsValues(t *testing.T) {
 		value := card[0]
 		assert.Equal(t, ParseSuit(suit), ParseCard(card).Suit(), "Suits does not match")
 		assert.Equal(t, ParseValue(value), ParseCard(card).Value(), "Suits does not match")
+	}
+}
+
+func TestParseRange(t *testing.T) {
+	ranges := []string{
+		"AsAd:0.34,2s2c:0.34",
+	}
+	for _, rangeStr := range ranges {
+		range_ := ParseRange(rangeStr)
+		iter := range_.GetIterator()
+		for hand, w, end := iter.Next(); !end; hand, w, end = iter.Next() {
+			assert.Equal(t, float32(0.34), w, "Weight must me 1")
+			assert.True(t, strings.Contains(rangeStr, hand.ToString()), "Unknown hand in range")
+		}
 	}
 }

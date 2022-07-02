@@ -1,51 +1,69 @@
 package combinations
 
 func sameValuesComb(s *Selector, repeatCount uint8, combName CombinationName) (c Combination, found bool) {
+	idx := repeatCount
 	for invertedVal, valCount := range s.invertedValues {
-		if valCount >= repeatCount {
-			c.values[0] = uint8(12 - invertedVal)
+		val := uint8(12 - invertedVal)
+		if valCount >= repeatCount && !found {
+			for i := uint8(0); i < repeatCount; i++ {
+				c.values[i] = val
+				valCount--
+			}
 			c.name = combName
 			found = true
-			return
+		}
+		for valCount > 0 && idx < 5 {
+			c.values[idx] = val
+			valCount--
+			idx++
 		}
 	}
 	return
 }
 
-func FindHighComb(s *Selector) (Combination, bool) {
+func findHighComb(s *Selector) (Combination, bool) {
 	return sameValuesComb(s, 1, High)
 }
 
-func FindPairComb(s *Selector) (Combination, bool) {
+func findPairComb(s *Selector) (Combination, bool) {
 	return sameValuesComb(s, 2, Pair)
 }
 
-func FindSetComb(s *Selector) (Combination, bool) {
+func findSetComb(s *Selector) (Combination, bool) {
 	return sameValuesComb(s, 3, Set)
 }
 
-func FindQuadsComb(s *Selector) (Combination, bool) {
+func findQuadsComb(s *Selector) (Combination, bool) {
 	return sameValuesComb(s, 4, Quads)
 }
 
-func FindTwoPairsComb(s *Selector) (c Combination, found bool) {
+func findTwoPairsComb(s *Selector) (c Combination, found bool) {
 	fistPairFound := false
+	idx := uint8(4)
 	for invertedVal, valCount := range s.invertedValues {
+		val := uint8(12 - invertedVal)
 		if valCount >= 2 {
+			valCount -= 2
 			if !fistPairFound {
-				c.values[0] = uint8(12 - invertedVal)
-				c.name = TwoPairs
+				c.values[0] = val
+				c.values[1] = val
 				fistPairFound = true
 			} else {
-				c.values[1] = uint8(12 - invertedVal)
+				c.values[2] = val
+				c.values[3] = val
+
+				c.name = TwoPairs
 				found = true
-				return
 			}
+		}
+		if valCount > 0 && idx < 5 {
+			c.values[idx] = val
+			idx++
 		}
 	}
 	return
 }
-func FindFullHouseComb(s *Selector) (c Combination, found bool) {
+func findFullHouseComb(s *Selector) (c Combination, found bool) {
 	sumEqualValuesCount := 0
 	for invertedVal, valCount := range s.invertedValues {
 		if valCount >= 2 {
@@ -68,7 +86,7 @@ func FindFullHouseComb(s *Selector) (c Combination, found bool) {
 	return
 }
 
-func FindStraightComb(s *Selector) (c Combination, round bool) {
+func findStraightComb(s *Selector) (c Combination, round bool) {
 	var chainLen uint8
 	for invertedVal, valCount := range s.invertedValues {
 		if valCount == 0 {
@@ -88,7 +106,7 @@ func FindStraightComb(s *Selector) (c Combination, round bool) {
 	return
 }
 
-func FindFlushComb(s *Selector) (c Combination, found bool) {
+func findFlushComb(s *Selector) (c Combination, found bool) {
 	for suit, suitsCount := range s.suits {
 		if suitsCount < 5 {
 			continue
@@ -116,7 +134,7 @@ func FindFlushComb(s *Selector) (c Combination, found bool) {
 	return
 }
 
-func FindStraightFlushComb(s *Selector) (c Combination, found bool) {
+func findStraightFlushComb(s *Selector) (c Combination, found bool) {
 	for suit, suitsCount := range s.suits {
 		if suitsCount < 5 {
 			continue

@@ -1,6 +1,8 @@
 package combinations
 
-import "go-poker-equity/poker"
+import (
+	"go-poker-equity/poker"
+)
 
 type Selector struct {
 	cards          []poker.Card
@@ -14,7 +16,7 @@ func newCombinationsSelector(board poker.Board, hand poker.Hand) Selector {
 	cards = append(cards, c1)
 	cards = append(cards, c2)
 	if !poker.IsDistinct(cards...) {
-		panic("hand and board intersect, can not extract combinations")
+		panic("hand and board intersects, can not extract combinations")
 	}
 	return Selector{cards: cards}
 }
@@ -33,15 +35,15 @@ func extractCombination(board poker.Board, hand poker.Hand) Combination {
 	selector.calcCardsEntry()
 
 	extractors := []CombinationExtractor{
-		FindStraightFlushComb,
-		FindQuadsComb,
-		FindFullHouseComb,
-		FindFlushComb,
-		FindStraightComb,
-		FindSetComb,
-		FindTwoPairsComb,
-		FindPairComb,
-		FindHighComb,
+		findStraightFlushComb,
+		findQuadsComb,
+		findFullHouseComb,
+		findFlushComb,
+		findStraightComb,
+		findSetComb,
+		findTwoPairsComb,
+		findPairComb,
+		findHighComb,
 	}
 
 	for _, extractor := range extractors {
@@ -63,8 +65,14 @@ func selectHighestCombination(combinations []Combination) Combination {
 	return best
 }
 
-func DetermineWinners(board poker.Board, hands []poker.Hand) []poker.Hand {
-	var winners []poker.Hand
+func DetermineWinners(board poker.Board, hands []poker.Hand) []int {
+	if len(board) != 5 {
+		panic("can determine winners only on river")
+	}
+	if len(hands) < 2 {
+		panic("too little players to determine winner, need at least 2")
+	}
+	var winners []int
 	var handsCombos []Combination
 	for _, hand := range hands {
 		highestComb := extractCombination(board, hand)
@@ -73,7 +81,7 @@ func DetermineWinners(board poker.Board, hands []poker.Hand) []poker.Hand {
 	highestComb := selectHighestCombination(handsCombos)
 	for i := 0; i < len(hands); i++ {
 		if highestComb == handsCombos[i] {
-			winners = append(winners, hands[i])
+			winners = append(winners, i)
 		}
 	}
 	return winners
