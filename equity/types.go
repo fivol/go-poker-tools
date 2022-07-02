@@ -1,13 +1,15 @@
-package main
+package equity
 
-import "go-poker-equity/poker"
+import (
+	"go-poker-equity/poker"
+)
 
 type HandEquity struct {
 	Hand   poker.Hand
 	Equity Equity
 }
 
-type EquityRange []HandEquity
+type Equity float32
 
 func (h HandEquity) ToString() string {
 	return h.ToString()

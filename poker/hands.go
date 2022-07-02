@@ -6,32 +6,31 @@ import (
 	"strings"
 )
 
-type Hand []Card
+type Hand uint16
 
-type Weight float32
+func NewHand(c1, c2 Card) Hand {
+	if c1.Grater(c2) {
+		c1, c2 = c2, c1
+	}
+	return Hand(c1*52 + c2)
+}
 
-type WeightedHand struct {
-	Hand   Hand
-	Weight Weight
+func (h Hand) Cards() (Card, Card) {
+	return Card(h / 52), Card(h % 52)
 }
 
 func (h Hand) ToString() string {
-	return h[0].ToString() + h[1].ToString()
-}
-
-func (h WeightedHand) ToString() string {
-	return fmt.Sprintf("%s:%f", h.Hand.ToString(), h.Weight)
+	c1, c2 := h.Cards()
+	return c1.ToString() + c2.ToString()
 }
 
 func ParseHand(handStr string) Hand {
 	card1str := handStr[:2]
 	card2str := handStr[2:]
-	card1 := ParseCard(card1str)
-	card2 := ParseCard(card2str)
-	return []Card{card1, card2}
+	return NewHand(ParseCard(card1str), ParseCard(card2str))
 }
 
-func ParseWightedHand(handStr string) WeightedHand {
+func ParseWightedHand(handStr string) (Hand, float32) {
 	handWeightArr := strings.Split(handStr, ":")
 	var weight float32 = 1
 	if len(handStr) == 2 {
@@ -42,5 +41,5 @@ func ParseWightedHand(handStr string) WeightedHand {
 		weight = float32(w)
 	}
 	hand := ParseHand(handWeightArr[0])
-	return WeightedHand{hand, Weight(weight)}
+	return hand, weight
 }

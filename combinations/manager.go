@@ -3,42 +3,51 @@ package combinations
 import "go-poker-equity/poker"
 
 type Selector struct {
-	cards  []poker.Card
-	suits  [4]uint8
-	values [13]uint8
+	cards          []poker.Card
+	suits          [4]uint8
+	invertedValues [13]uint8
 }
 
 func newCombinationsSelector(board poker.Board, hand poker.Hand) Selector {
-	cards := hand
-	for _, card := range board {
-		cards = append(cards, card)
-	}
+	c1, c2 := hand.Cards()
+	cards := board
+	cards = append(cards, c1)
+	cards = append(cards, c2)
 	return Selector{cards: cards}
 }
 
 func (c *Selector) calcCardsEntry() {
 	for _, card := range c.cards {
-		c.suits[poker.Suit(card)]++
-		c.values[poker.Value(card)]++
+		c.suits[card.Suit()]++
+		c.invertedValues[12-card.Suit()]++
 	}
 }
 
 type CombinationExtractor func(c *Selector) (Combination, bool)
 
-func extractCombinations(board poker.Board, hand poker.Hand) []Combination {
+func extractCombination(board poker.Board, hand poker.Hand) Combination {
 	selector := newCombinationsSelector(board, hand)
 	selector.calcCardsEntry()
 
-	var combinations []Combination
-	extractors := []CombinationExtractor{FindCombHigh}
+	extractors := []CombinationExtractor{
+		FindStraightFlushComb,
+		FindQuadsComb,
+		FindFullHouseComb,
+		FindFlushComb,
+		FindStraightComb,
+		FindSetComb,
+		FindTwoPairsComb,
+		FindPairComb,
+		FindHighComb,
+	}
 
 	for _, extractor := range extractors {
 		combination, found := extractor(&selector)
 		if found {
-			combinations = append(combinations, combination)
+			return combination
 		}
 	}
-	return combinations
+	panic("any hand has combination, at least high value, unreachable code")
 }
 
 func selectHighestCombination(combinations []Combination) Combination {
@@ -55,8 +64,7 @@ func DetermineWinners(board poker.Board, hands []poker.Hand) []poker.Hand {
 	var winners []poker.Hand
 	var handsCombos []Combination
 	for _, hand := range hands {
-		combinations := extractCombinations(board, hand)
-		highestComb := selectHighestCombination(combinations)
+		highestComb := extractCombination(board, hand)
 		handsCombos = append(handsCombos, highestComb)
 	}
 	highestComb := selectHighestCombination(handsCombos)
