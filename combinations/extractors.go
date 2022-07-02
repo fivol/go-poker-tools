@@ -6,6 +6,7 @@ func sameValuesComb(s *Selector, repeatCount uint8, combName CombinationName) (c
 			c.values[0] = uint8(12 - invertedVal)
 			c.name = combName
 			found = true
+			return
 		}
 	}
 	return
@@ -82,6 +83,7 @@ func FindStraightComb(s *Selector) (c Combination, round bool) {
 		round = true
 		c.name = Straight
 		c.values[0] = val + 4
+		return
 	}
 	return
 }

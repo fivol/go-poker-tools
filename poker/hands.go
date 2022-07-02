@@ -25,9 +25,12 @@ func (h Hand) ToString() string {
 }
 
 func ParseHand(handStr string) Hand {
-	card1str := handStr[:2]
-	card2str := handStr[2:]
-	return NewHand(ParseCard(card1str), ParseCard(card2str))
+	c1 := ParseCard(handStr[:2])
+	c2 := ParseCard(handStr[2:])
+	if !IsDistinct(c1, c2) {
+		panic("try parse hand with same cards")
+	}
+	return NewHand(c1, c2)
 }
 
 func ParseWightedHand(handStr string) (Hand, float32) {

@@ -1,9 +1,22 @@
 package poker
 
-var suitNames = [4]uint8{'S', 'H', 'D', 'C'}
-var valueNames = [13]uint8{'2', '3', '4', '5', '6', '7', '8', '9', '9', 'J', 'Q', 'K', 'A'}
+import "fmt"
+
+var suitNames = [4]uint8{'s', 'h', 'd', 'c'}
+var valueNames = [13]uint8{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
 
 type Card int16
+
+func IsDistinct(cards ...Card) bool {
+	var passed [52]bool
+	for _, card := range cards {
+		if passed[card] {
+			return false
+		}
+		passed[card] = true
+	}
+	return true
+}
 
 func ParseSuit(suitName uint8) uint8 {
 	for i, s := range suitNames {
@@ -24,10 +37,12 @@ func ParseValue(valueName uint8) uint8 {
 }
 
 func ParseCard(cardName string) Card {
-	// In Format ValueSuit: 3S, AC, TD, 9S
+	// In Format ValueSuit: 3s, Ac, Td, 9s
+	if len(cardName) == 0 {
+		panic("can not parse empty card")
+	}
 	if len(cardName) != 2 {
-		panic("card format incorrect")
-		return 0
+		panic(fmt.Sprintf("card format incorrect: %v", cardName))
 	}
 	value := ParseValue(cardName[0])
 	suit := ParseSuit(cardName[1])

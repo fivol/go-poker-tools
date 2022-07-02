@@ -13,13 +13,16 @@ func newCombinationsSelector(board poker.Board, hand poker.Hand) Selector {
 	cards := board
 	cards = append(cards, c1)
 	cards = append(cards, c2)
+	if !poker.IsDistinct(cards...) {
+		panic("hand and board intersect, can not extract combinations")
+	}
 	return Selector{cards: cards}
 }
 
 func (c *Selector) calcCardsEntry() {
 	for _, card := range c.cards {
 		c.suits[card.Suit()]++
-		c.invertedValues[12-card.Suit()]++
+		c.invertedValues[12-card.Value()]++
 	}
 }
 
