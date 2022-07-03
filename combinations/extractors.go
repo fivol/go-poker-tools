@@ -42,7 +42,7 @@ func findTwoPairsComb(s *Selector) (c Combination, found bool) {
 	idx := uint8(4)
 	for invertedVal, valCount := range s.invertedValues {
 		val := uint8(12 - invertedVal)
-		if valCount >= 2 {
+		if valCount >= 2 && !found {
 			valCount -= 2
 			if !fistPairFound {
 				c.values[0] = val

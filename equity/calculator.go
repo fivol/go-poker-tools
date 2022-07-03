@@ -70,7 +70,7 @@ func (c *equityCalculator) calcHandEquity(hand poker.Hand, params *RequestParams
 			winsCount++
 		}
 		iterationsDone++
-		if i%100 == 0 {
+		if i%100 == 0 && params.Timeout > 0 {
 			if time.Now().UnixMilli()-c.startMs >= int64(params.Timeout*1000) {
 				break
 			}
@@ -88,6 +88,11 @@ func addHandEquity(res *ResultData, hand poker.Hand, eq Equity, iterations uint3
 	}
 }
 
+func runHandEquityCalc(params *RequestParams, res *ResultData, calculator *equityCalculator, hand poker.Hand) {
+	equity, iterations := calculator.calcHandEquity(hand, params)
+	addHandEquity(res, hand, equity, iterations)
+}
+
 func CalculateEquity(params *RequestParams) (res ResultData) {
 	res.Equity = make(map[poker.Hand]Equity)
 	initRandom()
@@ -95,10 +100,11 @@ func CalculateEquity(params *RequestParams) (res ResultData) {
 	calculator.createOppRangesChoosers()
 	iter := poker.NewRangeIterator(&params.MyRange)
 	for hand, _, end := iter.Next(); !end; hand, _, end = iter.Next() {
-		equity, iterations := calculator.calcHandEquity(hand, params)
-		addHandEquity(&res, hand, equity, iterations)
+		if params.Board.Intersects(hand) {
+			continue
+		}
+		go runHandEquityCalc(params, &res, &calculator, hand)
 	}
-	println(time.Now().UnixMilli(), calculator.startMs)
 	res.TimeDelta = float32(time.Now().UnixMilli()-calculator.startMs) / 1000
 	return
 }

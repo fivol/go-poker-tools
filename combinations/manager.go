@@ -1,6 +1,7 @@
 package combinations
 
 import (
+	"fmt"
 	"go-poker-equity/poker"
 )
 
@@ -76,6 +77,7 @@ func DetermineWinners(board poker.Board, hands []poker.Hand) []int {
 	var handsCombos []Combination
 	for _, hand := range hands {
 		highestComb := extractCombination(board, hand)
+		fmt.Printf("%v %v %v\n", highestComb, highestComb.name == Quads, board.ToString())
 		handsCombos = append(handsCombos, highestComb)
 	}
 	highestComb := selectHighestCombination(handsCombos)

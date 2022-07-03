@@ -2,6 +2,24 @@ package poker
 
 type Board []Card
 
+func (board *Board) ToString() string {
+	var res string
+	for _, card := range *board {
+		res += card.ToString()
+	}
+	return res
+}
+
+func (board *Board) Intersects(hand Hand) bool {
+	c1, c2 := hand.Cards()
+	for _, h := range *board {
+		if h == c1 || h == c2 {
+			return true
+		}
+	}
+	return false
+}
+
 func parseCards(cardsStr string) []Card {
 	var cards []Card
 	for i := 0; i < len(cardsStr); i += 2 {

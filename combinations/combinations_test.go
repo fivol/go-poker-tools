@@ -258,6 +258,106 @@ func TestWinners(t *testing.T) {
 			[]string{"2cKs", "As3h"},
 			[]int{0},
 		},
+		{
+			"2s3s4s5s6s",
+			[]string{"Ac5c", "AsQs", "Ad2h"},
+			[]int{0, 1, 2},
+		},
+		{
+			"2s2d2h2c3c",
+			[]string{"Ac9d", "QsQd", "Ad3d"},
+			[]int{0, 2},
+		},
+		{
+			"5d5h5c3c3h",
+			[]string{"2h4d", "AsKh", "2c2d"},
+			[]int{0, 1, 2},
+		},
+		{
+			"5d5h5c3c3h",
+			[]string{"2h4d", "AsKh", "4c4d"},
+			[]int{2},
+		},
+		{
+			"6s6d6c2c3h",
+			[]string{"AsKd", "AcQh", "AhJh"},
+			[]int{0},
+		},
+		{
+			"6s6d6cAhKc",
+			[]string{"QhJc", "QcTc", "2h3h"},
+			[]int{0, 1, 2},
+		},
+		{
+			"2c2h3s3dAc",
+			[]string{"KhQh", "Qc5c", "4h6h"},
+			[]int{0, 1, 2},
+		},
+		{
+			"2c2h3s3dAc",
+			[]string{"KhQh", "Qc5c", "4h4c"},
+			[]int{2},
+		},
+		{
+			"KcKhQcQd2s",
+			[]string{"3s3d", "5s5d", "7s6d"},
+			[]int{2},
+		},
+		{
+			"AhKhQhJh8h",
+			[]string{"7h6d", "5s5d", "KcQc"},
+			[]int{0, 1, 2},
+		},
+		{
+			"AhKhQhJh6h",
+			[]string{"7h6d", "5s5d", "KcQc"},
+			[]int{0},
+		},
+		{
+			"8s7c6d5h4c",
+			[]string{"AcAd", "KcKd", "QcQd"},
+			[]int{0, 1, 2},
+		},
+		{
+			"8s7c6d5h4c",
+			[]string{"AcAd", "KcKd", "9c9d"},
+			[]int{2},
+		},
+		{
+			"8c8d7d6d2c",
+			[]string{"8s8h", "Td9d", "7c7s"},
+			[]int{1},
+		},
+		{
+			"AcJsTd9hKc",
+			[]string{"Ah7c", "As2c", "Ks8d"},
+			[]int{0, 1},
+		},
+		{
+			"Ac9sTd8hKc",
+			[]string{"AhQc", "As2c", "Ks2d"},
+			[]int{0},
+		},
+		{
+			"KcKdKh4c3c",
+			[]string{"4h4d", "3h3d", "5h5d"},
+			[]int{2},
+		},
+		{
+			"Ac2d3h4c5d",
+			[]string{"AhAd", "6s9d", "6c7d"},
+			[]int{2},
+		},
+		{
+			"AcAdAhAsKs",
+			[]string{"KcKd", "2s3d", "8s8d"},
+			[]int{0, 1, 2},
+		},
+		{
+			"KcKhQcQd8s",
+			[]string{"3s3d", "5s5d", "7s6d"},
+			[]int{0, 1, 2},
+		},
 	}
 	for _, testCase := range table {
 		board := poker.ParseBoard(testCase.board)
@@ -268,7 +368,7 @@ func TestWinners(t *testing.T) {
 		winners := DetermineWinners(board, hands)
 		sort.Ints(winners)
 		sort.Ints(testCase.winners)
-		assert.Equal(t, testCase.winners, winners, "Winners sets does not match")
+		assert.Equal(t, testCase.winners, winners, "Winners sets does not match", testCase.board)
 	}
 
 }
