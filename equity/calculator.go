@@ -1,9 +1,10 @@
 package equity
 
 import (
-	wr "github.com/mroth/weightedrand"
 	"go-poker-equity/combinations"
 	"go-poker-equity/poker"
+	wr "go-poker-equity/random"
+	//wr "github.com/mroth/weightedrand"
 	"math/rand"
 	"time"
 )
@@ -108,8 +109,14 @@ func runHandEquityCalc(calculator *equityCalculator, hand poker.Hand) {
 
 func runUntilStop(res *ResultData, calculator *equityCalculator, params *RequestParams) {
 	t0 := time.Now()
+	if params.Timeout == 0 && params.Iterations == 0 {
+		panic("Limits not selected")
+	}
 	totalIterations := uint32(0)
 	var iterationsBunch uint32 = 2000
+	if params.Timeout == 0 {
+		iterationsBunch = params.Iterations
+	}
 	for {
 		if params.Iterations > 0 && iterationsBunch+totalIterations > params.Iterations {
 			iterationsBunch = params.Iterations - totalIterations

@@ -31,21 +31,21 @@ func (c *Selector) calcCardsEntry() {
 
 type CombinationExtractor func(c *Selector) (Combination, bool)
 
+var extractors = []CombinationExtractor{
+	findStraightFlushComb,
+	findQuadsComb,
+	findFullHouseComb,
+	findFlushComb,
+	findStraightComb,
+	findSetComb,
+	findTwoPairsComb,
+	findPairComb,
+	findHighComb,
+}
+
 func extractCombination(board poker.Board, hand poker.Hand) Combination {
 	selector := newCombinationsSelector(board, hand)
 	selector.calcCardsEntry()
-
-	extractors := []CombinationExtractor{
-		findStraightFlushComb,
-		findQuadsComb,
-		findFullHouseComb,
-		findFlushComb,
-		findStraightComb,
-		findSetComb,
-		findTwoPairsComb,
-		findPairComb,
-		findHighComb,
-	}
 
 	for _, extractor := range extractors {
 		combination, found := extractor(&selector)
@@ -74,10 +74,10 @@ func DetermineWinners(board poker.Board, hands []poker.Hand) []int {
 		panic("too little players to determine winner, need at least 2")
 	}
 	var winners []int
-	var handsCombos []Combination
-	for _, hand := range hands {
+	handsCombos := make([]Combination, len(hands))
+	for i, hand := range hands {
 		highestComb := extractCombination(board, hand)
-		handsCombos = append(handsCombos, highestComb)
+		handsCombos[i] = highestComb
 	}
 	highestComb := selectHighestCombination(handsCombos)
 	for i := 0; i < len(hands); i++ {
