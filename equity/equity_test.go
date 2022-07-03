@@ -68,11 +68,15 @@ func BenchmarkCalculateEquity(b *testing.B) {
 		board := poker.ParseBoard(testCase.board)
 		var ranges []poker.Range
 		for _, rangeStr := range testCase.ranges {
-			ranges = append(ranges, poker.ParseRange(rangeStr))
+			r := poker.ParseRange(rangeStr)
+			r.RemoveCards(board)
+			ranges = append(ranges, r)
 		}
+		myRange := poker.ParseRange(testCase.myRange)
+		myRange.RemoveCards(board)
 		params := RequestParams{
 			Board:      board,
-			MyRange:    poker.ParseRange(testCase.myRange),
+			MyRange:    myRange,
 			OppRanges:  ranges,
 			Iterations: uint32(testCase.iterations),
 			Timeout:    1,

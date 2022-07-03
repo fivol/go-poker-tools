@@ -24,7 +24,7 @@ func printResults(result equity.ResultData) {
 	}
 	resultJson, err := json.Marshal(&outputModel)
 	if err != nil {
-		panic(err)
+		panic("fail to dump json")
 	}
 	fmt.Println(string(resultJson))
 }

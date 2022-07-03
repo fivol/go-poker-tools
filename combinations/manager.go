@@ -12,10 +12,10 @@ type Selector struct {
 
 func newCombinationsSelector(board poker.Board, hand poker.Hand) Selector {
 	c1, c2 := hand.Cards()
-	var cards []poker.Card
+	cards := make([]poker.Card, len(board)+2)
 	copy(cards, board)
-	cards = append(cards, c1)
-	cards = append(cards, c2)
+	cards[len(board)] = c1
+	cards[len(board)+1] = c2
 	if !poker.IsDistinct(cards...) {
 		panic("hand and board intersects, can not extract combinations")
 	}

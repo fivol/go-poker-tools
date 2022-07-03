@@ -375,5 +375,4 @@ func TestWinners(t *testing.T) {
 		sort.Ints(testCase.winners)
 		assert.Equal(t, testCase.winners, winners, "Winners sets does not match", testCase.board)
 	}
-
 }

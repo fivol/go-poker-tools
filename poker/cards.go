@@ -8,10 +8,8 @@ var valueNames = [13]uint8{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q'
 type Card int16
 
 func IsDistinct(cards ...Card) bool {
-	var s string
 	var passed [52]bool
 	for _, card := range cards {
-		s += card.ToString()
 		if passed[card] {
 			return false
 		}
