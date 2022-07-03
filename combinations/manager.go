@@ -1,7 +1,6 @@
 package combinations
 
 import (
-	"fmt"
 	"go-poker-equity/poker"
 )
 
@@ -13,7 +12,8 @@ type Selector struct {
 
 func newCombinationsSelector(board poker.Board, hand poker.Hand) Selector {
 	c1, c2 := hand.Cards()
-	cards := board
+	var cards []poker.Card
+	copy(cards, board)
 	cards = append(cards, c1)
 	cards = append(cards, c2)
 	if !poker.IsDistinct(cards...) {
@@ -77,7 +77,6 @@ func DetermineWinners(board poker.Board, hands []poker.Hand) []int {
 	var handsCombos []Combination
 	for _, hand := range hands {
 		highestComb := extractCombination(board, hand)
-		fmt.Printf("%v %v %v\n", highestComb, highestComb.name == Quads, board.ToString())
 		handsCombos = append(handsCombos, highestComb)
 	}
 	highestComb := selectHighestCombination(handsCombos)

@@ -358,6 +358,11 @@ func TestWinners(t *testing.T) {
 			[]string{"3s3d", "5s5d", "7s6d"},
 			[]int{0, 1, 2},
 		},
+		{
+			"6s9c4hQcKd",
+			[]string{"KsKc", "2s3h"},
+			[]int{0},
+		},
 	}
 	for _, testCase := range table {
 		board := poker.ParseBoard(testCase.board)

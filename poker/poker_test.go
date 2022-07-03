@@ -68,3 +68,10 @@ func TestParseRange(t *testing.T) {
 		}
 	}
 }
+
+func TestIsDistinct(t *testing.T) {
+	assert.True(t, IsDistinct(parseCards("7hAsQdJs8hThAc")...), "Cards not distinct fail")
+	assert.True(t, IsDistinct(parseCards("7hAsQdJs8h4hQc")...), "Cards not distinct fail")
+	assert.True(t, IsDistinct(parseCards("7hAsQdJs8hQcKh")...), "Cards not distinct fail")
+
+}

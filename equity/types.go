@@ -16,7 +16,7 @@ type RequestParams struct {
 	MyRange    poker.Range
 	OppRanges  []poker.Range
 	Iterations uint32
-	Timeout    float32
+	Timeout    float64
 }
 
 type ResultData struct {

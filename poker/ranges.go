@@ -49,3 +49,15 @@ func (r *Range) RemoveHands(hands []Hand) {
 		r[hand] = 0
 	}
 }
+
+func (r *Range) RemoveCards(cards []Card) {
+	var hands []Hand
+	for _, c1 := range cards {
+		for c2 := Card(0); c2 < 52; c2++ {
+			if c1 != c2 {
+				hands = append(hands, NewHand(c1, c2))
+			}
+		}
+	}
+	r.RemoveHands(hands)
+}

@@ -24,3 +24,8 @@ go build .
 ```
 go test ./...
 ```
+
+## Run benchmarks
+```
+go test go-poker-equity/equity -bench=. -benchtime=1s
+```

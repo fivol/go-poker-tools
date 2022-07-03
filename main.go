@@ -31,7 +31,7 @@ func printResults(result equity.ResultData) {
 
 func main() {
 	var iterations = flag.Int("iter", 0, "iterations count (0 for unlimited)")
-	var timeout = flag.Float64("timeout", 1, "timeout in seconds (fractional)")
+	var timeout = flag.Float64("timeout", 0, "timeout in seconds (fractional)")
 	flag.Parse()
 	if flag.NArg() < 3 {
 		panic("must be specified at least board and two ranges")
@@ -43,14 +43,19 @@ func main() {
 	board := poker.ParseBoard(flag.Args()[0])
 	var ranges []poker.Range
 	for _, rangeStr := range flag.Args()[1:] {
-		ranges = append(ranges, poker.ParseRange(rangeStr))
+		range_ := poker.ParseRange(rangeStr)
+		range_.RemoveCards(board)
+		ranges = append(ranges, range_)
+	}
+	if *iterations == 0 && *timeout == 0 {
+		panic("infinite run, set at least timeout or iterations")
 	}
 	params := equity.RequestParams{
 		Board:      board,
 		MyRange:    ranges[0],
 		OppRanges:  ranges[1:],
 		Iterations: uint32(*iterations),
-		Timeout:    float32(*timeout),
+		Timeout:    *timeout,
 	}
 	result := equity.CalculateEquity(&params)
 	printResults(result)
