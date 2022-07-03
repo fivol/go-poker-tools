@@ -1,7 +1,7 @@
 package equity
 
 import (
-	wr "github.com/mroth/weightedrand"
+	"github.com/jmcvetta/randutil"
 	"go-poker-equity/combinations"
 	"go-poker-equity/poker"
 	"math/rand"
@@ -14,7 +14,7 @@ type equityResult struct {
 }
 
 type equityCalculator struct {
-	choosers      []wr.Chooser
+	choosers      [][]randutil.Choice
 	oppRanges     []poker.Range
 	board         poker.Board
 	runIterations chan uint32
@@ -33,22 +33,14 @@ func newEquityCalculator(board poker.Board, oppRanges *[]poker.Range) equityCalc
 	}
 }
 
-func selectHand(chooser *wr.Chooser) poker.Hand {
-	return chooser.Pick().(poker.Hand)
-}
-
 func (c *equityCalculator) createOppRangesChoosers() {
 	for _, range_ := range c.oppRanges {
-		var choices []wr.Choice
+		choices := make([]randutil.Choice, 0, 2)
 		iter := poker.NewRangeIterator(&range_)
 		for hand, weight, end := iter.Next(); !end; hand, weight, end = iter.Next() {
-			choices = append(choices, wr.Choice{Item: hand, Weight: uint(weight * 1000)})
+			choices = append(choices, randutil.Choice{int(weight * 1000), hand})
 		}
-		chooser, err := wr.NewChooser(choices...)
-		if err != nil {
-			panic(err)
-		}
-		c.choosers = append(c.choosers, *chooser)
+		c.choosers = append(c.choosers, choices)
 	}
 }
 
@@ -59,7 +51,8 @@ func initRandom() {
 func (c *equityCalculator) selectOppHands() []poker.Hand {
 	var hands []poker.Hand
 	for i := 0; i < len(c.choosers); i++ {
-		hands = append(hands, selectHand(&c.choosers[i]))
+		result, _ := randutil.WeightedChoice(c.choosers[i])
+		hands = append(hands, result.Item.(poker.Hand))
 	}
 	return hands
 }
