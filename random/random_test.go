@@ -19,3 +19,10 @@ func BenchmarkFastRand(b *testing.B) {
 		fastrand.Uint32()
 	}
 }
+
+func BenchmarkPseudoRandom(b *testing.B) {
+	r := fastrand.RNG{}
+	for i := 0; i < b.N; i++ {
+		r.Uint32()
+	}
+}
