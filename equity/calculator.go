@@ -3,8 +3,8 @@ package equity
 import (
 	"go-poker-equity/combinations"
 	"go-poker-equity/poker"
-	wr "go-poker-equity/random"
-	//wr "github.com/mroth/weightedrand"
+	//wr "go-poker-equity/random"
+	wr "github.com/mroth/weightedrand"
 	"math/rand"
 	"time"
 )
