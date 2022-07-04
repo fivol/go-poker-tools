@@ -18,9 +18,11 @@ Optional flags in square brackets
 1. `--iter n` - Max iterations count (int number grater or equal zero). Default 0. If 0, stops by timeout
 2. `--timeout t` - Timeout in seconds (can be both float or integer value)
 3. `<board>` - Board in format: cards without spaces, for example `6s9c4hQcKd`
-4. `<my range>` - Range to measure equity for each hand (weights ignored), in format `<hand>,<hand>...` or `<hand>:<weight>,...`
-5. `<opp k range>` - Range for k-th opponent with weights in format `<hand>,<hand>...` or `<hand>:<weight>,...`,
-if weight omitted, it stands as 1. `<weight>` - number from 0 to 1, for example `0.34`, `0.002`
+4. `<my range>` - Range to measure equity for each hand (weights ignored), in format `<hand>,<hand>...` or `<hand>:<weight>,...`, 
+5. `<hand>` - Hand in format `<value>` (upper case: `23456789TJQKA`) with `<suit>` (lower case: `schd`), example: `9s9c`, `AcJh`
+6. `<opp k range>` - Range for k-th opponent with weights in format `<hand>,<hand>...` or `<hand>:<weight>,...`,
+if weight omitted, it stands as 1. 
+8`<weight>` - number from 0 to 1, for example `0.34`, `0.002`
 
 ## Build
 ```
