@@ -62,10 +62,24 @@ func initRandom() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
-func (c *equityCalculator) selectOppHands(myHand poker.Hand) []poker.Hand {
+func (c *equityCalculator) sampleOppHands(myHand poker.Hand) []poker.Hand {
 	hands := make([]poker.Hand, len(c.choosers[myHand]))
 	for i := 0; i < len(c.choosers[myHand]); i++ {
 		hands[i] = selectHand(&c.choosers[myHand][i])
+	}
+	return hands
+}
+
+func (c *equityCalculator) selectOppHands(myHand poker.Hand) []poker.Hand {
+	hands := c.sampleOppHands(myHand)
+	cards := make([]poker.Card, len(hands)*2)
+	for i, hand := range hands {
+		c1, c2 := hand.Cards()
+		cards[i*2] = c1
+		cards[i*2+1] = c2
+	}
+	if !poker.IsDistinct(cards...) {
+		return c.selectOppHands(myHand)
 	}
 	return hands
 }

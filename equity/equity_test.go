@@ -31,8 +31,15 @@ func TestCalculateEquity(t *testing.T) {
 			"6s9c4hQcKd",
 			"AsQh,AdAc",
 			[]string{"AhQd,AdAh", "2c3c,5d4d"},
-			1000,
+			10000,
 			map[string]float32{"AdAc": 1, "AsQh": 0.25},
+		},
+		{
+			"6s9c4hQcKd",
+			"AsQh,AdAc,2h2s",
+			[]string{"AhQd,AdAh,Js8s", "2c3c,5d4d,JsJd"},
+			100000,
+			map[string]float32{"2s2h": 0.125, "AdAc": 1, "AsQh": 0.43715},
 		},
 	}
 
