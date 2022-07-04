@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"go-poker-equity/equity"
 	"go-poker-equity/poker"
+	"io"
+	"io/ioutil"
+	"os"
+	"strings"
 )
 
 type EquityResultModel struct {
@@ -29,20 +33,54 @@ func printResults(result equity.ResultData) {
 	fmt.Println(string(resultJson))
 }
 
+func readRanges(input io.Reader, rangeLines *[]string) {
+	file, err := ioutil.ReadAll(input)
+	if err != nil {
+		panic("reading ranges error: " + err.Error())
+	}
+	for _, line := range strings.Split(string(file), "\n") {
+		rangeStr := strings.Trim(line, " \n")
+		if rangeStr != "" {
+			*rangeLines = append(*rangeLines, rangeStr)
+		}
+	}
+}
+
 func main() {
 	var iterations = flag.Int("iter", 0, "iterations count (0 for unlimited)")
 	var timeout = flag.Float64("timeout", 0, "timeout in seconds (fractional)")
+	var rangesFile = flag.String("ranges", "", "path to file with ranges lines")
 	flag.Parse()
-	if flag.NArg() < 3 {
-		panic("must be specified at least board and two ranges")
+	var rangeLines []string
+	if flag.NArg() < 1 {
+		panic("must specify board")
+	}
+	if flag.NArg() >= 3 {
+		for _, rangeStr := range flag.Args()[1:] {
+			rangeLines = append(rangeLines, rangeStr)
+		}
+	}
+	if *rangesFile != "" {
+		file, err := os.Open(*rangesFile)
+		if err != nil {
+			panic("ranges file open error: " + err.Error())
+		}
+		readRanges(file, &rangeLines)
+	}
+	if len(rangeLines) == 0 && *rangesFile == "" {
+		readRanges(os.Stdin, &rangeLines)
+	}
+	if len(rangeLines) < 2 {
+		panic("must specify at least 2 ranges")
 	}
 
 	if *iterations < 0 {
 		panic("iterations must me grater or equal zero")
 	}
 	board := poker.ParseBoard(flag.Args()[0])
+
 	var ranges []poker.Range
-	for _, rangeStr := range flag.Args()[1:] {
+	for _, rangeStr := range rangeLines {
 		range_ := poker.ParseRange(rangeStr)
 		range_.RemoveCards(board)
 		ranges = append(ranges, range_)
