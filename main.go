@@ -39,7 +39,7 @@ func readRanges(input io.Reader, rangeLines *[]string) {
 		panic("reading ranges error: " + err.Error())
 	}
 	for _, line := range strings.Split(string(file), "\n") {
-		rangeStr := strings.Trim(line, " \n")
+		rangeStr := strings.Trim(line, " \n\r")
 		if rangeStr != "" {
 			*rangeLines = append(*rangeLines, rangeStr)
 		}
