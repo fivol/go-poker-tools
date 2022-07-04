@@ -65,23 +65,25 @@ func (c *equityCalculator) selectOppHands() []poker.Hand {
 	return hands
 }
 
-func (c *equityCalculator) iterHandWinCheck(hand poker.Hand) bool {
+func (c *equityCalculator) iterHandWinCheck(hand poker.Hand) (bool, int) {
 	hands := c.selectOppHands()
 	hands = append(hands, hand)
 	winners := combinations.DetermineWinners(c.board, hands)
+	isWin := false
 	for _, winner := range winners {
 		if winner == len(hands)-1 {
-			return true
+			isWin = true
 		}
 	}
-	return false
+	return isWin, len(winners)
 }
 
-func (c *equityCalculator) calcHandWinCount(hand poker.Hand, iterations uint32) uint32 {
-	var winsCount uint32
+func (c *equityCalculator) calcHandWinCount(hand poker.Hand, iterations uint32) float32 {
+	var winsCount float32
 	for i := uint32(0); i < iterations; i++ {
-		if c.iterHandWinCheck(hand) {
-			winsCount++
+		won, winnersCount := c.iterHandWinCheck(hand)
+		if won {
+			winsCount += 1.0 / float32(winnersCount)
 		}
 	}
 	return winsCount
@@ -89,7 +91,7 @@ func (c *equityCalculator) calcHandWinCount(hand poker.Hand, iterations uint32) 
 
 func runHandEquityCalc(calculator *equityCalculator, hand poker.Hand) {
 	var totalIterations uint32
-	var totalWinCount uint32
+	var totalWinCount float32
 	for {
 		iterations := <-calculator.runIterations
 		if iterations == 0 {
@@ -99,7 +101,7 @@ func runHandEquityCalc(calculator *equityCalculator, hand poker.Hand) {
 		totalWinCount += calculator.calcHandWinCount(hand, iterations)
 		calculator.done <- true
 	}
-	equity := Equity(float32(totalWinCount) / float32(totalIterations))
+	equity := Equity(totalWinCount / float32(totalIterations))
 	result := equityResult{
 		equity: equity,
 		hand:   hand,
