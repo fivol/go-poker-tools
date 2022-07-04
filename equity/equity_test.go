@@ -1,8 +1,8 @@
 package equity
 
 import (
-	"github.com/stretchr/testify/assert"
 	"go-poker-equity/poker"
+	"math"
 	"testing"
 )
 
@@ -27,6 +27,13 @@ func TestCalculateEquity(t *testing.T) {
 			1,
 			map[string]float32{"2s3h": 0},
 		},
+		{
+			"6s9c4hQcKd",
+			"AsQh,AdAc",
+			[]string{"AhQd,AdAh", "2c3c,5d4d"},
+			1000,
+			map[string]float32{"AdAc": 1, "AsQh": 0.25},
+		},
 	}
 
 	for _, testCase := range table {
@@ -44,7 +51,10 @@ func TestCalculateEquity(t *testing.T) {
 		}
 		result := CalculateEquity(&params)
 		for hand, equity := range testCase.equity {
-			assert.Equal(t, equity, float32(result.Equity[poker.ParseHand(hand)]), "Equity not match", hand, equity)
+			calculatedEquity := float32(result.Equity[poker.ParseHand(hand)])
+			if math.Abs(float64(calculatedEquity-equity)) > 0.01 {
+				t.Error("Equity not match", hand, calculatedEquity, "!=", equity)
+			}
 		}
 	}
 }
@@ -69,11 +79,11 @@ func BenchmarkCalculateEquity(b *testing.B) {
 		var ranges []poker.Range
 		for _, rangeStr := range testCase.ranges {
 			r := poker.ParseRange(rangeStr)
-			r.RemoveCards(board)
+			r.RemoveCards(board...)
 			ranges = append(ranges, r)
 		}
 		myRange := poker.ParseRange(testCase.myRange)
-		myRange.RemoveCards(board)
+		myRange.RemoveCards(board...)
 		params := RequestParams{
 			Board:      board,
 			MyRange:    myRange,

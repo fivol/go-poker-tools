@@ -82,7 +82,7 @@ func main() {
 	var ranges []poker.Range
 	for _, rangeStr := range rangeLines {
 		range_ := poker.ParseRange(rangeStr)
-		range_.RemoveCards(board)
+		range_.RemoveCards(board...)
 		ranges = append(ranges, range_)
 	}
 	if *iterations == 0 && *timeout == 0 {

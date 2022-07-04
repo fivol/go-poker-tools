@@ -4,9 +4,9 @@ import (
 	"strings"
 )
 
-const rangeLen uint16 = 2704
+const RangeLen uint16 = 2704
 
-type Range [rangeLen]float32
+type Range [RangeLen]float32
 
 type RangeIterator struct {
 	r    *Range
@@ -14,7 +14,7 @@ type RangeIterator struct {
 }
 
 func (iter *RangeIterator) Next() (h Hand, weight float32, end bool) {
-	for ; uint16(iter.hand) < rangeLen; iter.hand++ {
+	for ; uint16(iter.hand) < RangeLen; iter.hand++ {
 		if iter.r[iter.hand] > 0 {
 			h = iter.hand
 			weight = iter.r[h]
@@ -50,7 +50,7 @@ func (r *Range) RemoveHands(hands []Hand) {
 	}
 }
 
-func (r *Range) RemoveCards(cards []Card) {
+func (r *Range) RemoveCards(cards ...Card) {
 	var hands []Hand
 	for _, c1 := range cards {
 		for c2 := Card(0); c2 < 52; c2++ {

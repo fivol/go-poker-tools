@@ -15,7 +15,7 @@ type equityResult struct {
 }
 
 type equityCalculator struct {
-	choosers      []wr.Chooser
+	choosers      [poker.RangeLen][]wr.Chooser
 	oppRanges     []poker.Range
 	board         poker.Board
 	runIterations chan uint32
@@ -38,18 +38,23 @@ func selectHand(chooser *wr.Chooser) poker.Hand {
 	return chooser.Pick().(poker.Hand)
 }
 
-func (c *equityCalculator) createOppRangesChoosers() {
-	for _, range_ := range c.oppRanges {
-		var choices []wr.Choice
-		iter := poker.NewRangeIterator(&range_)
-		for hand, weight, end := iter.Next(); !end; hand, weight, end = iter.Next() {
-			choices = append(choices, wr.Choice{Item: hand, Weight: uint(weight * 1000)})
+func (c *equityCalculator) createOppRangesChoosers(myRange *poker.Range) {
+	myRangeIter := poker.NewRangeIterator(myRange)
+	for myHand, _, ended := myRangeIter.Next(); !ended; myHand, _, ended = myRangeIter.Next() {
+		for _, range_ := range c.oppRanges {
+			var choices []wr.Choice
+			oppRangeCopy := range_
+			oppRangeCopy.RemoveCards(myHand.Cards())
+			iter := poker.NewRangeIterator(&oppRangeCopy)
+			for hand, weight, end := iter.Next(); !end; hand, weight, end = iter.Next() {
+				choices = append(choices, wr.Choice{Item: hand, Weight: uint(weight * 1000)})
+			}
+			chooser, err := wr.NewChooser(choices...)
+			if err != nil {
+				panic(err)
+			}
+			c.choosers[myHand] = append(c.choosers[myHand], *chooser)
 		}
-		chooser, err := wr.NewChooser(choices...)
-		if err != nil {
-			panic(err)
-		}
-		c.choosers = append(c.choosers, *chooser)
 	}
 }
 
@@ -57,16 +62,16 @@ func initRandom() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
-func (c *equityCalculator) selectOppHands() []poker.Hand {
-	var hands []poker.Hand
-	for i := 0; i < len(c.choosers); i++ {
-		hands = append(hands, selectHand(&c.choosers[i]))
+func (c *equityCalculator) selectOppHands(myHand poker.Hand) []poker.Hand {
+	hands := make([]poker.Hand, len(c.choosers[myHand]))
+	for i := 0; i < len(c.choosers[myHand]); i++ {
+		hands[i] = selectHand(&c.choosers[myHand][i])
 	}
 	return hands
 }
 
 func (c *equityCalculator) iterHandWinCheck(hand poker.Hand) (bool, int) {
-	hands := c.selectOppHands()
+	hands := c.selectOppHands(hand)
 	hands = append(hands, hand)
 	winners := combinations.DetermineWinners(c.board, hands)
 	isWin := false
@@ -152,7 +157,7 @@ func CalculateEquity(params *RequestParams) (res ResultData) {
 	res.Equity = make(map[poker.Hand]Equity)
 	initRandom()
 	calculator := newEquityCalculator(params.Board, &params.OppRanges)
-	calculator.createOppRangesChoosers()
+	calculator.createOppRangesChoosers(&params.MyRange)
 	iter := poker.NewRangeIterator(&params.MyRange)
 	for hand, _, end := iter.Next(); !end; hand, _, end = iter.Next() {
 		go runHandEquityCalc(&calculator, hand)
