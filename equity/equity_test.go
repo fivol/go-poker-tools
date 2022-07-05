@@ -41,17 +41,32 @@ func TestCalculateEquity(t *testing.T) {
 			100000,
 			map[string]float32{"2s2h": 0.125, "AdAc": 1, "AsQh": 0.43715},
 		},
+		{
+			"4d8h9s2cKh",
+			"9h2c,9h2d,9h2s,9c2h,9c2d,9c2s,9d2h,9d2c,9d2s,9s2h,9s2c,9s2d",
+			[]string{"9h2h,9c2c,9d2d,9s2s", "Kh5h,Kc5c,Kd5d,Ks5s,Kh4h,Kc4c,Kd4d,Ks4s,Kh3h,Kc3c,Kd3d,Ks3s,Kh2h,Kc2c,Kd2d,Ks2s"},
+			100000,
+			map[string]float32{
+				"9d2s": 0.335,
+				"9c2s": 0.3526,
+				"9h2s": 0.375,
+			},
+		},
 	}
 
 	for _, testCase := range table {
 		board := poker.ParseBoard(testCase.board)
 		var ranges []poker.Range
 		for _, rangeStr := range testCase.ranges {
-			ranges = append(ranges, poker.ParseRange(rangeStr))
+			range_ := poker.ParseRange(rangeStr)
+			range_.RemoveCards(board...)
+			ranges = append(ranges, range_)
 		}
+		myRange := poker.ParseRange(testCase.myRange)
+		myRange.RemoveCards(board...)
 		params := RequestParams{
 			Board:      board,
-			MyRange:    poker.ParseRange(testCase.myRange),
+			MyRange:    myRange,
 			OppRanges:  ranges,
 			Iterations: uint32(testCase.iterations),
 			Timeout:    1,

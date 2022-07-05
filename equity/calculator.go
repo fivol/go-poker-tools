@@ -46,8 +46,15 @@ func (c *equityCalculator) createOppRangesChoosers(myRange *poker.Range) {
 			oppRangeCopy := range_
 			oppRangeCopy.RemoveCards(myHand.Cards())
 			iter := poker.NewRangeIterator(&oppRangeCopy)
+			weightsSum := uint(0)
 			for hand, weight, end := iter.Next(); !end; hand, weight, end = iter.Next() {
-				choices = append(choices, wr.Choice{Item: hand, Weight: uint(weight * 1000)})
+				weightInt := uint(weight * 1000)
+				choices = append(choices, wr.Choice{Item: hand, Weight: weightInt})
+				weightsSum += weightInt
+			}
+			if weightsSum == 0 {
+				myRange[myHand] = 0
+				continue
 			}
 			chooser, err := wr.NewChooser(choices...)
 			if err != nil {

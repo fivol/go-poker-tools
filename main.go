@@ -51,6 +51,7 @@ func main() {
 	var timeout = flag.Float64("timeout", 0, "timeout in seconds (fractional)")
 	var rangesFile = flag.String("ranges", "", "path to file with ranges lines")
 	flag.Parse()
+
 	var rangeLines []string
 	if flag.NArg() < 1 {
 		panic("must specify board")
@@ -78,7 +79,6 @@ func main() {
 		panic("iterations must me grater or equal zero")
 	}
 	board := poker.ParseBoard(flag.Args()[0])
-
 	var ranges []poker.Range
 	for _, rangeStr := range rangeLines {
 		range_ := poker.ParseRange(rangeStr)
