@@ -1,8 +1,8 @@
-package combinations
+package winner
 
 import (
 	"github.com/stretchr/testify/assert"
-	"go-poker-equity/poker"
+	"go-poker-tools/pkg/types"
 	"sort"
 	"testing"
 )
@@ -184,8 +184,8 @@ func TestExtractors(t *testing.T) {
 		},
 	}
 	for _, testCase := range table {
-		board := poker.ParseBoard(testCase.board)
-		hand := poker.ParseHand(testCase.hand)
+		board := types.ParseBoard(testCase.board)
+		hand := types.ParseHand(testCase.hand)
 		selector := newCombinationsSelector(board, hand)
 		selector.calcCardsEntry()
 		combination, found := testCase.extractor(&selector)
@@ -195,10 +195,10 @@ func TestExtractors(t *testing.T) {
 		}
 	}
 	assert.Panics(t, func() {
-		newCombinationsSelector(poker.ParseBoard("Ts3h5c"), poker.ParseHand("5cTd"))
+		newCombinationsSelector(types.ParseBoard("Ts3h5c"), types.ParseHand("5cTd"))
 	}, "Must panic that cards intersects")
 	assert.Panics(t, func() {
-		newCombinationsSelector(poker.ParseBoard("5c6c7c8c9c"), poker.ParseHand("7c9c"))
+		newCombinationsSelector(types.ParseBoard("5c6c7c8c9c"), types.ParseHand("7c9c"))
 	}, "Must panic that cards intersects")
 }
 
@@ -365,10 +365,10 @@ func TestWinners(t *testing.T) {
 		},
 	}
 	for _, testCase := range table {
-		board := poker.ParseBoard(testCase.board)
-		var hands []poker.Hand
+		board := types.ParseBoard(testCase.board)
+		var hands []types.Hand
 		for _, hand := range testCase.hands {
-			hands = append(hands, poker.ParseHand(hand))
+			hands = append(hands, types.ParseHand(hand))
 		}
 		winners := DetermineWinners(board, hands)
 		sort.Ints(winners)

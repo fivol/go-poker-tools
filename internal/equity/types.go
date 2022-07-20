@@ -2,25 +2,25 @@ package equity
 
 import (
 	"fmt"
-	"go-poker-equity/poker"
+	"go-poker-tools/pkg/types"
 )
 
 type HandEquity struct {
-	Hand   poker.Hand
+	Hand   types.Hand
 	Equity Equity
 }
 type Equity float32
 
 type RequestParams struct {
-	Board      poker.Board
-	MyRange    poker.Range
-	OppRanges  []poker.Range
+	Board      types.Board
+	MyRange    types.Range
+	OppRanges  []types.Range
 	Iterations uint32
 	Timeout    float64
 }
 
 type ResultData struct {
-	Equity     map[poker.Hand]Equity
+	Equity     map[types.Hand]Equity
 	Iterations uint32
 	TimeDelta  float32
 }

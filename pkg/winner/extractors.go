@@ -1,4 +1,4 @@
-package combinations
+package winner
 
 func sameValuesComb(s *Selector, repeatCount uint8, combName CombinationName) (c Combination, found bool) {
 	idx := repeatCount
@@ -63,6 +63,7 @@ func findTwoPairsComb(s *Selector) (c Combination, found bool) {
 	}
 	return
 }
+
 func findFullHouseComb(s *Selector) (c Combination, found bool) {
 	sumEqualValuesCount := 0
 	for invertedVal, valCount := range s.invertedValues {

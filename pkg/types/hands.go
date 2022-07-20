@@ -1,4 +1,4 @@
-package poker
+package types
 
 import (
 	"fmt"
@@ -17,6 +17,16 @@ func NewHand(c1, c2 Card) Hand {
 
 func (h Hand) Cards() (Card, Card) {
 	return Card(h / 52), Card(h % 52)
+}
+
+func ToCards(hands ...Hand) []Card {
+	cards := make([]Card, len(hands)*2)
+	for i, hand := range hands {
+		c1, c2 := hand.Cards()
+		cards[i*2] = c1
+		cards[i*2+1] = c2
+	}
+	return cards
 }
 
 func (h Hand) ToString() string {

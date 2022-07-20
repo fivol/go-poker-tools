@@ -11,13 +11,13 @@ hand = '2dQc'
 
 
 def run_calculator(iterations) -> dict:
-    p = subprocess.Popen(f"./go-poker-equity --iter {iterations} {board} {hand} {opp_range}", stdout=subprocess.PIPE, shell=True)
+    p = subprocess.Popen(f"./go-types-go-types-tools --iter {iterations} {board} {hand} {opp_range}", stdout=subprocess.PIPE, shell=True)
     return json.loads(p.communicate()[0].decode().strip())
 
 
 if __name__ == '__main__':
     equity = []
     for i in tqdm.tqdm(range(1000000, 20000000, 1000000)):
-        equity.append(run_calculator(i)['equity']['2dQc'])
+        equity.append(run_calculator(i)['go-types-tools']['2dQc'])
     print(equity)
 

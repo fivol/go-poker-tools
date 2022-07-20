@@ -1,4 +1,4 @@
-package poker
+package types
 
 type Board []Card
 

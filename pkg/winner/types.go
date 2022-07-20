@@ -1,4 +1,4 @@
-package combinations
+package winner
 
 type CombinationName uint8
 
