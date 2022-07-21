@@ -51,11 +51,14 @@ func main() {
 	t0 := time.Now()
 	board := types.ParseBoard(os.Args[1])
 	var hands types.HandsList
-	if len(os.Args) >= 3 {
-		hands = readHands(strings.NewReader(os.Args[2]))
-	} else {
-		hands = readHands(os.Stdin)
-	}
+	println(len(os.Args))
+	hands = readHands(os.Stdin)
+	print("after read")
+	//if len(os.Args) >= 3 {
+	//	hands = readHands(strings.NewReader(os.Args[2]))
+	//} else {
+	//	hands = readHands(os.Stdin)
+	//}
 	handsCombos := combinations.GetHandsCombinations(board, hands)
 	combosHands := combinations.HandsByCombination(handsCombos)
 	handsByCombination := make(map[string][]string)
