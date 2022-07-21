@@ -6,8 +6,7 @@ import subprocess
 def run_combos(board, hands) -> dict:
     bin_path = './cmd/go-poker-combinations/go-poker-combinations'
     assert os.path.exists(bin_path), 'have no combinations executable'
-    p = subprocess.Popen(f"{bin_path} {board} {','.join(hands)}", stdout=subprocess.PIPE, shell=True)
-    return json.loads(p.communicate()[0].decode().strip())
+    return json.loads(subprocess.run([bin_path, board, ','.join(hands)], capture_output=True).stdout)
 
 
 if __name__ == '__main__':

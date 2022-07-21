@@ -37,7 +37,7 @@ var combinations = []ExtractorWithName{
 	{findPocketTP2GSH, "pocket_tp_2_gsh"},
 	{findPocketTop2, "pocket_top_2"},
 	{findSecondFD13Nuts, "2nd_fd_1_3_nuts"},
-	{findSecondFD4Nuts, "2nd_2nd_fd_4_nuts"},
+	{findSecondFD4Nuts, "2nd_fd_4_nuts"},
 	{findSecondOESD, "2nd_oesd"},
 	{findSecondGSH, "2nd_gsh"},
 	{findSecond, "2nd"},

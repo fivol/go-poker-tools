@@ -21,6 +21,7 @@ type cardsInfo struct {
 	minValue          uint8
 	//maxFreeValue      [4]uint8
 	maxOrderLen       uint8
+	maxOrderIdx       uint8
 	maxSameSuitsCount uint8
 	maxSameValues     uint8
 }
@@ -30,6 +31,7 @@ func newCardsInfo(cards []types.Card) (ci cardsInfo) {
 	if !types.IsDistinct(cards...) {
 		panic("hand and board intersects, can not extract winner")
 	}
+	ci.minValue = 12
 	for _, card := range cards {
 		//ci.chart[card.Suit()][card.Value()] = true
 		ci.suits[card.Suit()]++
@@ -60,7 +62,10 @@ func newCardsInfo(cards []types.Card) (ci cardsInfo) {
 		}
 		ci.stairsUpLen[i] = maxOrder
 		ci.graterValuesCount[i] = order - 1
-		ci.maxOrderLen = generics.Max(ci.maxOrderLen, maxOrder)
+		if maxOrder > ci.maxOrderLen {
+			ci.maxOrderLen = maxOrder
+			ci.maxOrderIdx = uint8(i)
+		}
 	}
 	maxOrder = 0
 	for i := 0; i <= 12; i++ {

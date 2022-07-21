@@ -26,7 +26,7 @@ func printResults(result ResultModel) {
 	fmt.Println(string(resultJson))
 }
 
-func readHands(input io.Reader) types.HandsList {
+func readHands(input io.Reader, board types.Board) types.HandsList {
 	file, err := ioutil.ReadAll(input)
 	if err != nil {
 		panic("reading ranges error: " + err.Error())
@@ -37,6 +37,7 @@ func readHands(input io.Reader) types.HandsList {
 	}
 	var handsList types.HandsList
 	hands := types.ParseRange(handsStr)
+	hands.RemoveCards(board...)
 	iter := types.NewRangeIterator(&hands)
 	for hand, _, end := iter.Next(); !end; hand, _, end = iter.Next() {
 		handsList = append(handsList, hand)
@@ -51,14 +52,12 @@ func main() {
 	t0 := time.Now()
 	board := types.ParseBoard(os.Args[1])
 	var hands types.HandsList
-	println(len(os.Args))
-	hands = readHands(os.Stdin)
-	print("after read")
-	//if len(os.Args) >= 3 {
-	//	hands = readHands(strings.NewReader(os.Args[2]))
-	//} else {
-	//	hands = readHands(os.Stdin)
-	//}
+	if len(os.Args) >= 3 {
+		hands = readHands(strings.NewReader(os.Args[2]), board)
+	} else {
+		hands = readHands(os.Stdin, board)
+	}
+
 	handsCombos := combinations.GetHandsCombinations(board, hands)
 	combosHands := combinations.HandsByCombination(handsCombos)
 	handsByCombination := make(map[string][]string)

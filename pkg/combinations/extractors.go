@@ -12,6 +12,24 @@ func ifThenElse(condition bool, then, other uint8) uint8 {
 	return other
 }
 
+type Source int
+
+const (
+	Total Source = iota
+	Board
+	Hand
+)
+
+func (s *Selector) getSource(source Source) cardsInfo {
+	if source == Total {
+		return s.total
+	}
+	if source == Board {
+		return s.board
+	}
+	return s.hand
+}
+
 func (s *Selector) handSameValues() bool {
 	return s.hand.maxSameValues == 2
 }
@@ -92,9 +110,9 @@ func (s *Selector) poketPairValue() uint8 {
 	return s.hand.cards[0].Value()
 }
 func (s *Selector) twoWaySD(card types.Card) bool {
-	up := s.upStairLen(card.Value())
-	down := s.downStairLen(card.Value() - 1)
-	return s.isOpenUpStair(card.Value()) && s.isOpenDownStair(card.Value()) && up+down == 4
+	up := s.total.upStairLen(card.Value())
+	down := s.total.downStairLen(card.Value() - 1)
+	return s.total.isOpenUpStair(card.Value()) && s.total.isOpenDownStair(card.Value()) && up+down == 4
 }
 func (s *Selector) handTwoWaySD() bool {
 	return s.twoWaySD(s.firstCard()) || s.twoWaySD(s.secondCard())
@@ -106,7 +124,7 @@ func (s *Selector) handOneCardSD() bool {
 	return s.oneCardSD(s.firstCard()) || s.oneCardSD(s.secondCard())
 }
 func (s *Selector) SD(card types.Card) bool {
-	return s.upStairLen(card.Value())+s.downStairLen(card.Value())-1 == 4
+	return s.total.upStairLen(card.Value())+s.total.downStairLen(card.Value())-1 == 4
 }
 func (s *Selector) FD() bool {
 	return s.maxSuitsWithHand() == 4
@@ -135,22 +153,28 @@ func (s *Selector) getFD() (bool, FD) {
 	return true, fd1
 }
 func (s *Selector) upGutshot(card types.Card) bool {
-	down := s.downStairLen(card.Value())
-	up := s.upStairLen(card.Value())
+	down := s.total.downStairLen(card.Value())
+	up := s.total.upStairLen(card.Value())
 	size := up + down - 1
 	if size >= 4 {
 		return false
 	}
-	return s.upStairLen(card.Value()+up+1)+size == 4
+	return s.total.upStairLen(card.Value()+up+1)+size == 4
+}
+func (ci *cardsInfo) getStraight() (bool, uint8) {
+	if ci.maxOrderLen < 5 {
+		return false, 0
+	}
+	return true, ci.maxOrderIdx
 }
 func (s *Selector) downGutshot(card types.Card) bool {
-	down := s.downStairLen(card.Value())
-	up := s.upStairLen(card.Value())
+	down := s.total.downStairLen(card.Value())
+	up := s.total.upStairLen(card.Value())
 	size := up + down - 1
 	if size >= 4 {
 		return false
 	}
-	return s.downStairLen(card.Value()-down-1)+size == 4
+	return s.total.downStairLen(card.Value()-down-1)+size == 4
 }
 func (s *Selector) gutshot(card types.Card) bool {
 	return s.upGutshot(card) || s.downGutshot(card)
@@ -190,39 +214,39 @@ func (s *Selector) maxSuitsWithHand() uint8 {
 func (s *Selector) isPokerPairGraterBoard() bool {
 	return s.pocketPairLessBoardCount(0)
 }
-func (s *Selector) upStairLen(value uint8) uint8 {
+func (ci *cardsInfo) upStairLen(value uint8) uint8 {
 	if value > 12 {
 		return 0
 	}
 	if value < 0 {
 		return 0
 	}
-	return s.total.stairsUpLen[value]
+	return ci.stairsUpLen[value]
 }
-func (s *Selector) isOpenUpStair(value uint8) bool {
-	size := s.upStairLen(value)
+func (ci *cardsInfo) isOpenUpStair(value uint8) bool {
+	size := ci.upStairLen(value)
 	return value+size-1 < 12
 }
-func (s *Selector) isOpenDownStair(value uint8) bool {
-	size := s.downStairLen(value)
+func (ci *cardsInfo) isOpenDownStair(value uint8) bool {
+	size := ci.downStairLen(value)
 	if size == 0 {
 		return false
 	}
 	return value-size+1 > 0
 }
-func (s *Selector) downStairLen(value uint8) uint8 {
+func (ci *cardsInfo) downStairLen(value uint8) uint8 {
 	if value > 12 {
 		return 0
 	}
 	if value < 0 {
 		return 0
 	}
-	return s.total.stairsDownLen[value]
+	return ci.stairsDownLen[value]
 }
 
 func findFlush(s *Selector) bool {
 	// flush
-	return s.total.maxSameSuitsCount >= 5
+	return s.total.suits[s.firstCard().Suit()] >= 5 || s.total.suits[s.secondCard().Suit()] >= 5
 }
 
 func findStraightFlush(s *Selector) bool {
@@ -263,7 +287,15 @@ func findStraightFlush(s *Selector) bool {
 
 func findStraight(s *Selector) bool {
 	// straight
-	return s.total.maxOrderLen >= 5
+	found, totalStraight := s.total.getStraight()
+	if !found {
+		return false
+	}
+	boardFound, boardStraight := s.board.getStraight()
+	if !boardFound {
+		return true
+	}
+	return totalStraight > boardStraight
 }
 
 func findSet(s *Selector) bool {
@@ -398,7 +430,7 @@ func findOESD(s *Selector) bool {
 		Двухстороннее Стритдро, для составления стрита которому необходима одна карта
 		и используется хотя бы одна карта, которая у нас на руках
 	*/
-	return s.twoWaySD(s.firstCard()) != s.twoWaySD(s.secondCard())
+	return s.twoWaySD(s.firstCard()) || s.twoWaySD(s.secondCard())
 }
 
 func findTPGSH(s *Selector) bool {
@@ -469,7 +501,7 @@ func findSecondFD13Nuts(s *Selector) bool {
 
 func findSecondFD4Nuts(s *Selector) bool {
 	/*
-		2nd_2nd_fd_4_nuts
+		2nd_fd_4_nuts
 		Совпадение одной из наших карманных карт со второй по номиналу картой борда плюс флешдро, которое не входит в топ-3 по номиналу карты, образующее это флешдро
 		(на основе номинала карты, образующей флешдро)
 	*/
@@ -641,7 +673,7 @@ func findNomade(s *Selector) bool {
 		Совсем пустые руки: без комбинаций,
 		которые еще и не подходят в категории overcards и topcards
 	*/
-	return s.handMinValue() < 9 && s.board.maxValue > s.handMinValue() && s.noCombos()
+	return s.handMinValue() < 8 && s.board.maxValue > s.handMinValue() && s.noCombos()
 }
 
 func findTopCards(s *Selector) bool {
@@ -649,7 +681,7 @@ func findTopCards(s *Selector) bool {
 		top_cards
 		Карманные карты, состоящие из двух картинок и не собравшие никакую из комбинаций сильнее
 	*/
-	return s.handMinValue() >= 9 && s.noCombos()
+	return s.handMinValue() >= 8 && s.noCombos()
 }
 
 func findOverCards(s *Selector) bool {
@@ -721,7 +753,7 @@ func findBadOESD(s *Selector) bool {
 		одного стрита будет использовать только одну карту,
 		которая ниже всех карт борда
 	*/
-	return s.handTwoWaySD() && !findBadOESD(s)
+	return !s.handSameValues() && (s.badOESDCard(s.firstCard()) || s.badOESDCard(s.secondCard()))
 }
 
 func findGoodOESD(s *Selector) bool {
@@ -729,7 +761,7 @@ func findGoodOESD(s *Selector) bool {
 		good_oesd
 		Все остальные OESD, которые не вошли в категорию bad OESD
 	*/
-	return !s.handSameValues() && (s.badOESDCard(s.firstCard()) || s.badOESDCard(s.secondCard()))
+	return findOESD(s) && !findBadOESD(s)
 }
 
 func findGoodGutShot(s *Selector) bool {

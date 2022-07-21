@@ -358,13 +358,13 @@ func TestCombinations(t *testing.T) {
 		},
 		{
 			"AsQs3d",
-			"Ks2s",
+			"Js2s",
 			"fd_2nd_3d_nuts_fd",
 			"",
 		},
 		{
 			"As9s3d",
-			"KsTs",
+			"QsTs",
 			"fd_2nd_3d_nuts_fd",
 			"",
 		},
@@ -389,7 +389,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"Tc9dQs",
 			"8c7c",
-			"bad_oesd",
+			"good_oesd",
 			"",
 		},
 		{
@@ -460,9 +460,9 @@ func TestCombinations(t *testing.T) {
 		},
 	}
 	for i, testCase := range table {
-		if i != 24 {
-			continue
-		}
+		//if i != 60 {
+		//	continue
+		//}
 		hand := types.ParseHand(testCase.hand)
 		board := types.ParseBoard(testCase.board)
 		combos := strings.Split(testCase.combos, ",")
@@ -477,13 +477,14 @@ func TestCombinations(t *testing.T) {
 			}
 			if !found {
 				t.Error(fmt.Sprintf("Test %d, board: %s, hand: %s, have no combination %s", i, testCase.board, testCase.hand, c))
-				break
+				return
 			}
 		}
 		for _, c := range foundCombos {
 			for _, comb := range noCombos {
 				if Comb(comb) == c {
 					t.Error(fmt.Sprintf("Test %d, board: %s, hand: %s, have combination %s", i, testCase.board, testCase.hand, c))
+					return
 				}
 			}
 		}
