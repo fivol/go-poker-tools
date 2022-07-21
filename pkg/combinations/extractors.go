@@ -51,6 +51,29 @@ func (s *Selector) otherCard(card types.Card) types.Card {
 	}
 	return s.firstCard()
 }
+func (ci *cardsInfo) getFullHouse() (bool, uint8, uint8) {
+	if ci.maxSameValues != 3 {
+		return false, 0, 0
+	}
+	foundPair := false
+	setIdx := uint8(0)
+	pairIdx := uint8(0)
+	for i := ci.minValue; i <= ci.maxValue; i++ {
+		if ci.values[i] >= 2 {
+			if ci.values[i] == 3 {
+				setIdx = generics.Max(i, setIdx)
+			}
+			if i != setIdx {
+				pairIdx = i
+			}
+			if foundPair {
+				return true, setIdx, pairIdx
+			}
+			foundPair = true
+		}
+	}
+	return false, 0, 0
+}
 func (s *Selector) badOESDCard(card types.Card) bool {
 	if card.Value() >= s.board.minValue {
 		return false
@@ -270,7 +293,8 @@ func findStraightFlush(s *Selector) bool {
 				if up >= 5 && s.board.stairsUpLen[value] < 5 {
 					match := true
 					for i := value; i < value+5; i++ {
-						if !chart[suit][i] {
+						val := i % 13
+						if !chart[suit][val] {
 							match = false
 							break
 						}
@@ -330,9 +354,15 @@ func findFullHouse(s *Selector) bool {
 		full_house
 		Три одинаковых карты плюс пара
 	*/
-	first := s.total.values[s.firstCard().Value()]
-	second := s.total.values[s.secondCard().Value()]
-	return first+second == 5 && (first == 2 || second == 2)
+	found, setIdxT, pairIdxT := s.total.getFullHouse()
+	if !found {
+		return false
+	}
+	foundBoard, setIdxB, pairIdxB := s.board.getFullHouse()
+	if !foundBoard {
+		return true
+	}
+	return (setIdxT > setIdxB) || (setIdxT == setIdxB && pairIdxT > pairIdxB)
 }
 
 func findTopSet(s *Selector) bool {
@@ -364,10 +394,6 @@ func findMediumTwoPairs(s *Selector) bool {
 		firstCardBoardOrder != 0 &&
 		secondCardBoardOrder != 0 &&
 		(firstCardBoardOrder == uint8(len(s.board.cards)) || secondCardBoardOrder == uint8(len(s.board.cards)))
-}
-
-func findPair(s *Selector) bool {
-	return s.isPokerPair()
 }
 
 func findOverPairOESD(s *Selector) bool {
@@ -484,7 +510,7 @@ func findPocketTP2GSH(s *Selector) bool {
 
 func findPocketTop2(s *Selector) bool {
 	/*
-		pocket_top_2
+		pocket_tp_2
 		Карманная пара ниже одной карты борда
 	*/
 	return s.pocketPairLessBoardCount(1)
@@ -778,7 +804,7 @@ func findGutShot(s *Selector) bool {
 		Стритдро, для составления стрита которому необходима одна
 		карта и используется хотя бы одна карта, которая у нас на руках
 	*/
-	return s.handGutShot()
+	return s.handOneCardSD()
 }
 
 func findBadGutShot(s *Selector) bool {

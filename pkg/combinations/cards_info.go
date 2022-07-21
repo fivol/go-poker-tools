@@ -67,14 +67,24 @@ func newCardsInfo(cards []types.Card) (ci cardsInfo) {
 			ci.maxOrderIdx = uint8(i)
 		}
 	}
+	if ci.values[12] > 0 {
+		maxOrder++
+		ci.stairsUpLen[12] = maxOrder
+		if maxOrder > ci.maxOrderLen {
+			ci.maxOrderLen = maxOrder
+			ci.maxOrderIdx = 12
+		}
+	}
+
 	maxOrder = 0
-	for i := 0; i <= 12; i++ {
-		if ci.values[i] > 0 {
+	for i := -1; i <= 12; i++ {
+		val := (i + 13) % 13
+		if ci.values[val] > 0 {
 			maxOrder++
 		} else {
 			maxOrder = 0
 		}
-		ci.stairsDownLen[i] = maxOrder
+		ci.stairsDownLen[val] = maxOrder
 	}
 	return
 }

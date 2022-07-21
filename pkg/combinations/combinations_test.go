@@ -3,7 +3,6 @@ package combinations
 import (
 	"fmt"
 	"go-poker-tools/pkg/types"
-	"strings"
 	"testing"
 )
 
@@ -11,7 +10,7 @@ func TestCombinations(t *testing.T) {
 	table := []struct {
 		board    string
 		hand     string
-		combos   string
+		comb     string
 		noCombos string
 	}{
 		{
@@ -191,7 +190,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"Js9d6c",
 			"TsTd",
-			"pocket_top_2",
+			"pocket_tp_2",
 			"",
 		},
 		{
@@ -435,7 +434,7 @@ func TestCombinations(t *testing.T) {
 			"",
 		},
 		{
-			"4c8c9cTc",
+			"4c8c9cTd",
 			"Ac3h",
 			"fd",
 			"",
@@ -460,33 +459,13 @@ func TestCombinations(t *testing.T) {
 		},
 	}
 	for i, testCase := range table {
-		//if i != 60 {
-		//	continue
-		//}
 		hand := types.ParseHand(testCase.hand)
 		board := types.ParseBoard(testCase.board)
-		combos := strings.Split(testCase.combos, ",")
-		noCombos := strings.Split(testCase.noCombos, ",")
-		foundCombos := GetCombinations(board, hand)
-		for _, c := range combos {
-			found := false
-			for _, comb := range foundCombos {
-				if Comb(c) == comb {
-					found = true
-				}
-			}
-			if !found {
-				t.Error(fmt.Sprintf("Test %d, board: %s, hand: %s, have no combination %s", i, testCase.board, testCase.hand, c))
-				return
-			}
-		}
-		for _, c := range foundCombos {
-			for _, comb := range noCombos {
-				if Comb(comb) == c {
-					t.Error(fmt.Sprintf("Test %d, board: %s, hand: %s, have combination %s", i, testCase.board, testCase.hand, c))
-					return
-				}
-			}
+		trueComb := testCase.comb
+		comb := GetCombinations(board, hand)
+		if comb != Comb(trueComb) {
+			t.Error(fmt.Sprintf("Test %d, board: %s, hand: %s, %s != %s", i, testCase.board, testCase.hand, comb, trueComb))
+			return
 		}
 	}
 
