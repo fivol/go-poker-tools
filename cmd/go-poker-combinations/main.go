@@ -14,7 +14,6 @@ import (
 
 type ResultModel struct {
 	HandsByCombination map[string][]string `json:"combinations"`
-	HandsCombinations  map[string][]string `json:"hands"`
 	TimeDelta          float64             `json:"time_delta"`
 }
 
@@ -61,20 +60,13 @@ func main() {
 	handsCombos := combinations.GetHandsCombinations(board, hands)
 	combosHands := combinations.HandsByCombination(handsCombos)
 	handsByCombination := make(map[string][]string)
-	handsCombinations := make(map[string][]string)
 	for comb, handsList := range combosHands {
 		for _, hand := range handsList {
 			handsByCombination[string(comb)] = append(handsByCombination[string(comb)], hand.ToString())
 		}
 	}
-	for hand, combos := range handsCombos {
-		for _, comb := range combos {
-			handsCombinations[hand.ToString()] = append(handsCombinations[hand.ToString()], string(comb))
-		}
-	}
 	printResults(ResultModel{
 		handsByCombination,
-		handsCombinations,
 		time.Since(t0).Seconds(),
 	})
 }
