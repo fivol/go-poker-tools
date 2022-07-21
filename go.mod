@@ -1,4 +1,4 @@
-module gihub.com/fivol/go-poker-tools
+module go-poker-tools
 
 go 1.18
 

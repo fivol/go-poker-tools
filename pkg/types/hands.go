@@ -8,6 +8,8 @@ import (
 
 type Hand uint16
 
+type HandsList []Hand
+
 func NewHand(c1, c2 Card) Hand {
 	if c1.Grater(c2) {
 		c1, c2 = c2, c1
