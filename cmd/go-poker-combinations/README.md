@@ -5,10 +5,14 @@
 ```
 cd cmd/go-poker-combinations
 go build
+GOOS=linux GOARCH=386 go build
 ```
+[Build for different Architectures](https://www.digitalocean.com/community/tutorials/how-to-build-go-executables-for-multiple-platforms-on-ubuntu-16-04) 
 
 ### Examples
 ```
 ./go-poker-combinations --hands 2h2c Ks7s2s
+./go-poker-combinations --hands 2h2c --combos set Ks7s2s
 echo 2h2c | ./go-poker-combinations Ks7s2s
 ```
+
