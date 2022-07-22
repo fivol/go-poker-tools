@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
-	"go-poker-tools/internal/combinations"
+	"go-poker-tools/pkg/combinations"
 	"go-poker-tools/pkg/types"
 	"io"
 	"io/ioutil"
@@ -11,6 +12,22 @@ import (
 	"strings"
 	"time"
 )
+
+func GetHandsCombinations(board types.Board, hands []types.Hand, extractors []combinations.ExtractorWithName) map[types.Hand]combinations.Comb {
+	result := make(map[types.Hand]combinations.Comb)
+	for _, hand := range hands {
+		result[hand] = combinations.GetCombinations(board, hand, extractors)
+	}
+	return result
+}
+
+func HandsByCombination(handsCombos map[types.Hand]combinations.Comb) map[combinations.Comb]types.HandsList {
+	result := make(map[combinations.Comb]types.HandsList)
+	for hand, comb := range handsCombos {
+		result[comb] = append(result[comb], hand)
+	}
+	return result
+}
 
 type ResultModel struct {
 	HandsByCombination map[string][]string `json:"combinations"`
@@ -45,20 +62,30 @@ func readHands(input io.Reader, board types.Board) types.HandsList {
 }
 
 func main() {
-	if len(os.Args) < 2 {
+	var combosArg = flag.String("combos", "", "list of combos to use: trips,top_set,medium_set (use all by default)")
+	var handsArg = flag.String("hands", "", "list of hands: 2s2d,KcQd")
+	flag.Parse()
+	if flag.NArg() < 1 {
 		panic("Must specify board with first argument")
 	}
 	t0 := time.Now()
-	board := types.ParseBoard(os.Args[1])
+	board := types.ParseBoard(flag.Args()[0])
 	var hands types.HandsList
-	if len(os.Args) >= 3 {
-		hands = readHands(strings.NewReader(os.Args[2]), board)
+	if *handsArg != "" {
+		hands = readHands(strings.NewReader(*handsArg), board)
 	} else {
 		hands = readHands(os.Stdin, board)
 	}
-
-	handsCombos := combinations.GetHandsCombinations(board, hands)
-	combosHands := combinations.HandsByCombination(handsCombos)
+	combos := combinations.GetAllCombos()
+	if *combosArg != "" {
+		combos = []combinations.Comb{}
+		for _, comb := range strings.Split(*combosArg, ",") {
+			combos = append(combos, combinations.Comb(comb))
+		}
+	}
+	extractors := combinations.GetExtractors(combos)
+	handsCombos := GetHandsCombinations(board, hands, extractors)
+	combosHands := HandsByCombination(handsCombos)
 	handsByCombination := make(map[string][]string)
 	for comb, handsList := range combosHands {
 		for _, hand := range handsList {

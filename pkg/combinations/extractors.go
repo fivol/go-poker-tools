@@ -84,7 +84,7 @@ func (s *Selector) badGutShotCard(card types.Card) bool {
 	if card.Value() >= s.board.minValue {
 		return false
 	}
-	return s.gutshot(card)
+	return s.gutShot(card)
 }
 func (s *Selector) pocketPairLessBoardCount(count uint8) bool {
 	return s.isPokerPair() && s.board.graterValuesCount[s.poketPairValue()] == count
@@ -140,11 +140,11 @@ func (s *Selector) twoWaySD(card types.Card) bool {
 func (s *Selector) handTwoWaySD() bool {
 	return s.twoWaySD(s.firstCard()) || s.twoWaySD(s.secondCard())
 }
-func (s *Selector) oneCardSD(card types.Card) bool {
-	return (s.SD(card) || s.gutshot(card)) && !s.twoWaySD(card)
+func (s *Selector) gutShot(card types.Card) bool {
+	return (s.SD(card) || s.gutShotWhole(card)) && !s.twoWaySD(card)
 }
 func (s *Selector) handOneCardSD() bool {
-	return s.oneCardSD(s.firstCard()) || s.oneCardSD(s.secondCard())
+	return s.gutShot(s.firstCard()) || s.gutShot(s.secondCard())
 }
 func (s *Selector) SD(card types.Card) bool {
 	return s.total.upStairLen(card.Value())+s.total.downStairLen(card.Value())-1 == 4
@@ -175,7 +175,7 @@ func (s *Selector) getFD() (bool, FD) {
 	}
 	return true, fd1
 }
-func (s *Selector) upGutshot(card types.Card) bool {
+func (s *Selector) upGutshotWhole(card types.Card) bool {
 	down := s.total.downStairLen(card.Value())
 	up := s.total.upStairLen(card.Value())
 	size := up + down - 1
@@ -190,7 +190,7 @@ func (ci *cardsInfo) getStraight() (bool, uint8) {
 	}
 	return true, ci.maxOrderIdx
 }
-func (s *Selector) downGutshot(card types.Card) bool {
+func (s *Selector) downGutshotWhole(card types.Card) bool {
 	down := s.total.downStairLen(card.Value())
 	up := s.total.upStairLen(card.Value())
 	size := up + down - 1
@@ -199,11 +199,8 @@ func (s *Selector) downGutshot(card types.Card) bool {
 	}
 	return s.total.downStairLen(card.Value()-down-1)+size == 4
 }
-func (s *Selector) gutshot(card types.Card) bool {
-	return s.upGutshot(card) || s.downGutshot(card)
-}
-func (s *Selector) handGutShot() bool {
-	return s.gutshot(s.firstCard()) || s.gutshot(s.secondCard())
+func (s *Selector) gutShotWhole(card types.Card) bool {
+	return s.upGutshotWhole(card) || s.downGutshotWhole(card)
 }
 func (s *Selector) pairHandBoardIdx(card types.Card) uint8 {
 	return s.board.valueOrder[card.Value()]
@@ -397,18 +394,24 @@ func findMediumTwoPairs(s *Selector) bool {
 }
 
 func findOverPairOESD(s *Selector) bool {
-	// overpair_oesd
+	/*
+		overpair_oesd
+		Карманная пара выше всех карт флопа и образующая двухстороннее стритдро
+	*/
 	return s.isPokerPairGraterBoard() && s.twoWaySD(s.firstCard())
 }
 
 func findOverPair(s *Selector) bool {
-	// overpair
+	/*
+		overpair
+		Карманная пара, выше всех карт борда
+	*/
 	return s.isPokerPairGraterBoard()
 }
 
 func findOverPairGSH(s *Selector) bool {
 	// overpair_gsh
-	return s.isPokerPairGraterBoard() && s.oneCardSD(s.firstCard())
+	return s.isPokerPairGraterBoard() && s.gutShot(s.firstCard())
 }
 
 func findHighOverPair(s *Selector) bool {
@@ -465,7 +468,7 @@ func findTPGSH(s *Selector) bool {
 	if s.board.valueOrder[s.hand.cards[0].Value()] != 1 {
 		otherIdx = 1
 	}
-	return findTP(s) && s.oneCardSD(s.hand.cards[otherIdx])
+	return findTP(s) && s.gutShot(s.hand.cards[otherIdx])
 }
 
 func findTP(s *Selector) bool {
@@ -505,7 +508,7 @@ func findPocketTP2GSH(s *Selector) bool {
 		pocket_tp_2_gsh
 		Карманная пара ниже одной карты борда и имеющая  стритдро на одну карту
 	*/
-	return findPocketTop2(s) && s.oneCardSD(s.firstCard())
+	return findPocketTop2(s) && s.gutShot(s.firstCard())
 }
 
 func findPocketTop2(s *Selector) bool {
@@ -551,7 +554,7 @@ func findSecondGSH(s *Selector) bool {
 		номиналу картой борда плюс  стритдро на одну карту, образованное нашей второй картой
 	*/
 	first := s.pairHandBoardIdx(s.firstCard())
-	return findSecond(s) && s.oneCardSD(s.card(ifThenElse(first == 2, 1, 0)))
+	return findSecond(s) && s.gutShot(s.card(ifThenElse(first == 2, 1, 0)))
 }
 
 func findSecond(s *Selector) bool {
@@ -599,7 +602,7 @@ func findPocketBetween23GSH(s *Selector) bool {
 		pocket_between_2_3_gsh
 		Карманная пара ниже двух карт борда и имеющая  стритдро на одну карту
 	*/
-	return findPocketBetween23(s) && s.oneCardSD(s.firstCard())
+	return findPocketBetween23(s) && s.gutShot(s.firstCard())
 }
 
 func findPocketBetween23(s *Selector) bool {
@@ -793,9 +796,9 @@ func findGoodOESD(s *Selector) bool {
 func findGoodGutShot(s *Selector) bool {
 	/*
 		good_gutshot
-		Все остальные гатшоты, которые не вошли в категорию bad gutshot
+		Все остальные гатшоты, которые не вошли в категорию bad gutShotWhole
 	*/
-	return s.handGutShot() && !findBadGutShot(s)
+	return s.handOneCardSD() && !findBadGutShot(s)
 }
 
 func findGutShot(s *Selector) bool {

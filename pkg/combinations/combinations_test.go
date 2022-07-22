@@ -23,68 +23,63 @@ func TestCombinations(t *testing.T) {
 			"straight",
 		},
 		{
-			"Kc7s2s",
-			"KdKh",
+			"Kc7d2h",
+			"KsKd",
 			"top_set",
 		},
 		{
-			"Ks7s2s",
-			"2h2c",
+			"Kc7c2c",
+			"7s7d",
 			"medium_set",
 		},
 		{
-			"Ks7s2s",
-			"7h7c",
+			"Kc7c2c",
+			"2s2d",
 			"medium_set",
 		},
 		{
-			"AsKs6s",
-			"AcKd",
+			"AcKs6d",
+			"AsKd",
 			"top_two_pairs",
 		},
 		{
-			"AsKs6s",
-			"Ac6d",
+			"AcKc6h",
+			"As6c",
 			"medium_two_pairs",
 		},
 		{
-			"AsKs6s",
-			"Kc6d",
+			"AcKc6h",
+			"Ks6d",
 			"medium_two_pairs",
 		},
 		{
-			"QsJsTs",
-			"KdKs",
+			"QdJcTh",
+			"KsKd",
 			"overpair_oesd",
 		},
 		{
-			"JsTs9s",
-			"KdKs",
+			"JdTc9h",
+			"KsKd",
 			"overpair_gsh",
 		},
 		{
-			"2s3s8s",
+			"2s3c8h",
 			"QsQd",
 			"high_overpair",
 		},
 		{
-			"9s8s2s",
-			"JdJs",
+			"2s3c8h",
+			"JsJc",
 			"high_overpair",
 		},
 		{
-			"9s8s2s",
-			"JdJs",
-			"high_overpair",
-		},
-		{
-			"6s2s4s",
-			"9d9s",
+			"6h2d4c",
+			"9s9h",
 			"low_overpair",
 		},
 		{
-			"2s3d4s",
-			"7d7s",
+			"2s3c4d",
+			"7c7h",
 			"low_overpair",
 		},
 		{
@@ -128,8 +123,8 @@ func TestCombinations(t *testing.T) {
 			"tp_gsh",
 		},
 		{
-			"Js3s2s",
-			"AcJd",
+			"Jd3c2h",
+			"AsJh",
 			"tp",
 		},
 		{
@@ -243,13 +238,13 @@ func TestCombinations(t *testing.T) {
 			"3d_hands_oesd",
 		},
 		{
-			"3s4s6s",
+			"3s4c6h",
 			"7s3d",
 			"3d_hands_gsh",
 		},
 		{
-			"3s4s8s",
-			"7d3d",
+			"3s4d8h",
+			"7s3d",
 			"3d_hands",
 		},
 		{
@@ -273,8 +268,8 @@ func TestCombinations(t *testing.T) {
 			"nomade",
 		},
 		{
-			"3s2d2c",
-			"JsTs",
+			"3c2d2h",
+			"JsTc",
 			"top_cards",
 		},
 		{
@@ -318,8 +313,8 @@ func TestCombinations(t *testing.T) {
 			"good_oesd",
 		},
 		{
-			"4s5d6c",
-			"Ac3d",
+			"4s5d6h",
+			"As3d",
 			"bad_oesd",
 		},
 		{
@@ -333,8 +328,13 @@ func TestCombinations(t *testing.T) {
 			"good_gutshot",
 		},
 		{
-			"8s9sJs",
-			"As7c",
+			"3d4c6s",
+			"As2s",
+			"bad_gutshot",
+		},
+		{
+			"8c9hJd",
+			"As7d",
 			"bad_gutshot",
 		},
 		{
@@ -383,15 +383,42 @@ func TestCombinations(t *testing.T) {
 			"trips",
 		},
 	}
+	skipCombos := map[int][]Comb{
+		66: []Comb{"top_set", "medium_set"},
+		67: []Comb{"high_overpair"},
+		68: []Comb{"good_oesd"},
+		69: []Comb{"good_gutshot"},
+		70: []Comb{"fd_nuts_fd"},
+	}
+	allCombos := GetAllCombos()
 	for i, testCase := range table {
 		hand := types.ParseHand(testCase.hand)
 		board := types.ParseBoard(testCase.board)
 		trueComb := testCase.comb
-		comb := GetCombinations(board, hand)
+		combos := subCombos(allCombos, skipCombos[i])
+		extractors := GetExtractors(combos)
+		comb := GetCombinations(board, hand, extractors)
 		if comb != Comb(trueComb) {
 			t.Error(fmt.Sprintf("Test %d, board: %s, hand: %s, %s != %s", i, testCase.board, testCase.hand, comb, trueComb))
 			return
 		}
 	}
 
+}
+
+func subCombos(source []Comb, skip []Comb) []Comb {
+	var result []Comb
+	for _, comb := range source {
+		found := false
+		for _, c := range skip {
+			if c == comb {
+				found = true
+				break
+			}
+		}
+		if !found {
+			result = append(result, comb)
+		}
+	}
+	return result
 }

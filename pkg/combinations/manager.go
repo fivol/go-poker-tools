@@ -77,9 +77,31 @@ var combinations = []ExtractorWithName{
 	{findNomade, "nomade"},
 }
 
-func GetCombinations(board types.Board, hand types.Hand) Comb {
+func GetAllCombos() []Comb {
+	combs := make([]Comb, len(combinations))
+	for i, comb := range combinations {
+		combs[i] = comb.name
+	}
+	return combs
+}
+
+func GetExtractors(combos []Comb) []ExtractorWithName {
+	set := make(map[Comb]bool)
+	for _, comb := range combos {
+		set[comb] = true
+	}
+	var extractors []ExtractorWithName
+	for _, extractor := range combinations {
+		if set[extractor.name] {
+			extractors = append(extractors, extractor)
+		}
+	}
+	return extractors
+}
+
+func GetCombinations(board types.Board, hand types.Hand, useExtractors []ExtractorWithName) Comb {
 	selector := newCombinationsSelector(board, hand)
-	for _, combData := range combinations {
+	for _, combData := range useExtractors {
 		if combData.extractor(&selector) {
 			return combData.name
 		}
