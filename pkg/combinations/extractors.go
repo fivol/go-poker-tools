@@ -118,6 +118,15 @@ func (s *Selector) hasFD() bool {
 func (s *Selector) isTopFD() bool {
 	return s.isFDBetween(1, 1)
 }
+func (s *Selector) inStraightMiddle(card types.Card) bool {
+	if card.Value() == 0 {
+		return false
+	}
+	if s.total.downStairLen(card.Value()-1) == 0 {
+		return false
+	}
+	return s.total.upStairLen(card.Value()+1)+s.total.downStairLen(card.Value()-1)+1 >= 5
+}
 func (s *Selector) isWeakFD() bool {
 	return s.isFDBetween(4, 10)
 }
@@ -206,6 +215,15 @@ func (s *Selector) downGutshotWhole(card types.Card) bool {
 func (s *Selector) gutShotWhole(card types.Card) bool {
 	return s.upGutshotWhole(card) || s.downGutshotWhole(card)
 }
+func (s *Selector) HasFlush(card types.Card) bool {
+	if s.total.suits[card.Suit()] < 5 {
+		return false
+	}
+	if s.board.suits[card.Suit()] < 5 {
+		return true
+	}
+	return s.board.graterValuesCount[card.Value()] < 5
+}
 func (s *Selector) pairHandBoardIdx(card types.Card) uint8 {
 	return s.board.valueOrder[card.Value()]
 }
@@ -275,8 +293,28 @@ func (ci *cardsInfo) downStairLen(value uint8) uint8 {
 }
 
 func findFlush(s *Selector) bool {
-	// flush
-	return s.total.suits[s.firstCard().Suit()] >= 5 || s.total.suits[s.secondCard().Suit()] >= 5
+	/*
+		flush
+		5 карт одной масти
+	*/
+	return s.HasFlush(s.firstCard()) || s.HasFlush(s.secondCard())
+}
+
+func findHighFlushJ(s *Selector) bool {
+	/*
+		high_flush_j
+		Флеш, когда на доске лежит 4 карты одной масти, и старшая карта у нас из руки, которая используется, выше или равна J
+	*/
+	return s.firstCard().Value() >= 9 && s.HasFlush(s.firstCard()) ||
+		s.secondCard().Value() >= 9 && s.HasFlush(s.secondCard())
+}
+
+func findLowFlush(s *Selector) bool {
+	/*
+		low_flush
+		Флеш, когда на доске лежит 4 карты одной масти, и старшая карта у нас из руки, которая используется,ниже J
+	*/
+	return findFlush(s) && !findHighFlushJ(s)
 }
 
 func findStraightFlush(s *Selector) bool {
@@ -317,7 +355,10 @@ func findStraightFlush(s *Selector) bool {
 }
 
 func findStraight(s *Selector) bool {
-	// straight
+	/*
+		straight
+		5 карт подряд
+	*/
 	found, totalStraight := s.total.getStraight()
 	if !found {
 		return false
@@ -327,6 +368,27 @@ func findStraight(s *Selector) bool {
 		return true
 	}
 	return totalStraight > boardStraight
+}
+
+func findHighStraight(s *Selector) bool {
+	/*
+		high_straight
+		Стрит с использованием 4 карт борда и 1 карты с руки и эта карта не
+		является первой (младшей, за исключением случая, когда стрит A2345) картой в стрите
+	*/
+	if !findStraight(s) {
+		return false
+	}
+	return s.inStraightMiddle(s.firstCard()) || s.inStraightMiddle(s.secondCard())
+}
+
+func findLowStraight(s *Selector) bool {
+	/*
+		low_straight
+		Стрит с использованием 4 карт борда и 1 карты с руки и эта карта является первой
+		(младшей, за исключением случая, когда стрит A2345) картой в стрите
+	*/
+	return findStraight(s) && !findHighStraight(s)
 }
 
 func findSet(s *Selector) bool {
@@ -453,8 +515,19 @@ func findHighOverPairFD(s *Selector) bool {
 }
 
 func findLowOverPairFD(s *Selector) bool {
-	// low_overpair_fd
+	/*
+		low_overpair_fd
+		Оверпара от 99 включительно и ниже,имеющая флешдро
+	*/
 	return findLowOverPair(s) && s.maxSuitsWithHand() == 4
+}
+
+func findOverPairFD(s *Selector) bool {
+	/*
+		overpair_fd
+		Оверпара, имеющая флешдро
+	*/
+	return findOverPair(s) && s.hasFD()
 }
 
 func findTPFDNutsFd(s *Selector) bool {
