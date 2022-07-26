@@ -382,13 +382,81 @@ func TestCombinations(t *testing.T) {
 			"KcQd",
 			"trips",
 		},
+		{
+			"AcKc6h",
+			"As6c",
+			"two_pairs",
+		},
+		{
+			"AcKc6h",
+			"Ks6d",
+			"two_pairs",
+		},
+		{
+			"Ks3d8s7c",
+			"AsKd",
+			"old_tp",
+		},
+		{
+			"8s3c2s6d",
+			"8d7c",
+			"old_tp",
+		},
+		{
+			"3c8d9cKs",
+			"AsKd",
+			"new_tp",
+		},
+		{
+			"6c9d8cQs",
+			"KsQc",
+			"new_tp",
+		},
+		{
+			"As2s3s",
+			"6s6d",
+			"pocket_tp_2_fd",
+		},
+		{
+			"Ts7s2s",
+			"8s7d",
+			"2nd_fd",
+		},
+		{
+			"AsKs2s",
+			"7s7d",
+			"pocket_between_2_3_fd",
+		},
+		{
+			"KsQs3s",
+			"5s3d",
+			"3d_hands_fd",
+		},
+		{
+			"AsQs3d",
+			"Ks2s",
+			"fd_1st_3d_nuts_fd",
+		},
+		{
+			"As9s3d",
+			"KsTs",
+			"fd_1st_3d_nuts_fd",
+		},
 	}
 	skipCombos := map[int][]Comb{
 		66: []Comb{"top_set", "medium_set"},
 		67: []Comb{"high_overpair"},
 		68: []Comb{"good_oesd"},
 		69: []Comb{"good_gutshot"},
-		70: []Comb{"fd_nuts_fd"},
+		70: []Comb{"fd_nuts_fd", "fd_1st_3d_nuts_fd"},
+		74: []Comb{"medium_two_pairs"},
+		75: []Comb{"medium_two_pairs"},
+		80: []Comb{"pocket_tp_2_fd_4_nuts"},
+		81: []Comb{"2nd_fd_4_nuts"},
+		82: []Comb{"pocket_between_2_3_fd_4_nuts"},
+		83: []Comb{"3d_hands_fd_4_nuts"},
+		84: []Comb{"fd_nuts_fd"},
+		85: []Comb{"fd_nuts_fd"},
 	}
 	allCombos := GetAllCombos()
 	for i, testCase := range table {

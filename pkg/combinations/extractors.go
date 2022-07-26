@@ -111,6 +111,10 @@ func (s *Selector) isFDBetween(from, to int) bool {
 	idx := s.getFDIdx(fd)
 	return idx >= from && idx <= to
 }
+func (s *Selector) hasFD() bool {
+	found, _ := s.getFD()
+	return found
+}
 func (s *Selector) isTopFD() bool {
 	return s.isFDBetween(1, 1)
 }
@@ -224,6 +228,12 @@ func (s *Selector) pairWithBoardIdx() uint8 {
 }
 func (s *Selector) handPairTopBoard() bool {
 	return s.pairWithBoardIdx() == 1
+}
+func (s *Selector) hasTurn() bool {
+	return len(s.board.cards) >= 4
+}
+func (s *Selector) turnCard() types.Card {
+	return s.board.cards[3]
 }
 func (s *Selector) isOneCardPairWithBoard(idx uint8) bool {
 	return s.pairWithBoardIdx() == idx
@@ -384,13 +394,26 @@ func findTopTwoPairs(s *Selector) bool {
 }
 
 func findMediumTwoPairs(s *Selector) bool {
-	// medium_two_pairs
+	/*
+		medium_two_pairs
+		Две пары, которые образуются из совпадения обеих наших карт с двумя картами борда (c высшей и низшей или со средней и низшей)
+	*/
 	firstCardBoardOrder := s.board.valueOrder[s.hand.cards[0].Value()]
 	secondCardBoardOrder := s.board.valueOrder[s.hand.cards[1].Value()]
 	return !s.handSameValues() &&
 		firstCardBoardOrder != 0 &&
 		secondCardBoardOrder != 0 &&
 		(firstCardBoardOrder == uint8(len(s.board.cards)) || secondCardBoardOrder == uint8(len(s.board.cards)))
+}
+
+func findTwoPairs(s *Selector) bool {
+	/*
+		two_pairs
+		Две пары, которые образуются из совпадения обеих наших карт с двумя картами борда
+	*/
+	return !s.handSameValues() &&
+		s.board.values[s.firstCard().Value()] == 1 &&
+		s.board.values[s.secondCard().Value()] == 1
 }
 
 func findOverPairOESD(s *Selector) bool {
@@ -479,6 +502,32 @@ func findTP(s *Selector) bool {
 	return s.handPairTopBoard()
 }
 
+func findOldTP(s *Selector) bool {
+	/*
+		old_tp
+		Совпадение одной из наших карманных карт с высшей картой стола,
+		образовавшаяся на флопе и не изменившаяся к терну
+		(на терне вышла карта ниже самой высокой карты флопа и
+		у нас осталось совпадение с самой высокой картой доски)
+	*/
+	return s.hasTurn() &&
+		s.handPairTopBoard() &&
+		s.hand.values[s.turnCard().Value()] == 0 &&
+		s.board.valueOrder[s.turnCard().Value()] > 1
+}
+
+func findNewTP(s *Selector) bool {
+	/*
+			new_tp
+			Совпадение одной из наших карманных карт с высшей картой стола,
+		 	образовавшаяся на терне
+			(на терне вышла карта выше всех карт флопа и у нас совпадение с этой картой)
+	*/
+	return s.hasTurn() &&
+		s.handPairTopBoard() &&
+		!findOldTP(s)
+}
+
 func findPocketTP2FD13Nuts(s *Selector) bool {
 	/*
 		pocket_tp_2_fd_1_3_nuts
@@ -493,6 +542,14 @@ func findPocketTP2FD4Nuts(s *Selector) bool {
 		Карманная пара ниже одной карты борда и  имеющая 4е или ниже по силе флешдро
 	*/
 	return findPocketTop2(s) && s.isWeakFD()
+}
+
+func findPocketTP2FD(s *Selector) bool {
+	/*
+		pocket_tp_2_fd
+		Карманная пара ниже одной карты борда и имеющая флешдро
+	*/
+	return findPocketTop2(s) && s.hasFD()
 }
 
 func findPocketTP2OESD(s *Selector) bool {
@@ -535,6 +592,15 @@ func findSecondFD4Nuts(s *Selector) bool {
 		(на основе номинала карты, образующей флешдро)
 	*/
 	return findSecond(s) && s.isWeakFD()
+}
+
+func findSecondFD(s *Selector) bool {
+	/*
+			2nd_fd
+			Совпадение одной из наших карманных карт со второй по номиналу картой борда плюс флешдро
+		 	(на основе номинала карты, образующей флешдро)
+	*/
+	return findSecond(s) && s.hasFD()
 }
 
 func findSecondOESD(s *Selector) bool {
@@ -587,6 +653,14 @@ func findPocketBetween23FD4Nuts(s *Selector) bool {
 		Карманная пара ниже двух карт борда и  имеющая 4е или ниже по силе флешдро
 	*/
 	return findPocketBetween23(s) && s.isWeakFD()
+}
+
+func findPocketBetween23FD(s *Selector) bool {
+	/*
+		pocket_between_2_3_fd
+		Карманная пара ниже двух карт борда и имеющая флешдро
+	*/
+	return findPocketBetween23(s) && s.hasFD()
 }
 
 func findPocketBetween23OESD(s *Selector) bool {
@@ -652,6 +726,15 @@ func find3dHandsFD4Nuts(s *Selector) bool {
 		(на основе номинала карты, образующей флешдро)
 	*/
 	return find3dHands(s) && s.isWeakFD()
+}
+
+func find3dHandsFD(s *Selector) bool {
+	/*
+			3d_hands_fd
+			Совпадение одной из наших карманных карт с третьей по номиналу картой борда плюс флешдро
+		 	(на основе номинала карты, образующей флешдро)
+	*/
+	return find3dHands(s) && s.hasFD()
 }
 
 func find3dHandsOESD(s *Selector) bool {
@@ -763,6 +846,14 @@ func findFD2nd3dNutsFD(s *Selector) bool {
 		которое может быть на доске (сила определяется по старшей карте на руке
 	*/
 	return s.isFDBetween(2, 3)
+}
+
+func findFD1nd3dNutsFD(s *Selector) bool {
+	/*
+		fd_1st_3d_nuts_fd
+		От первого до третьего флешдро по силе флешдро, которое может быть на доске (сила определяется по старшей карте на руке
+	*/
+	return s.isFDBetween(1, 3)
 }
 
 func findFD4NutsFD(s *Selector) bool {
