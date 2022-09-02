@@ -17,7 +17,6 @@ type Source int
 const (
 	Total Source = iota
 	Board
-	Hand
 )
 
 func (s *Selector) getSource(source Source) cardsInfo {
@@ -81,10 +80,12 @@ func (s *Selector) badOESDCard(card types.Card) bool {
 	return s.twoWaySD(card) && !s.twoWaySD(s.otherCard(card))
 }
 func (s *Selector) badGutShotCard(card types.Card) bool {
-	if card.Value() >= s.board.minValue {
+	if card.Value() >= s.board.minValue && card.Value() != 12 {
 		return false
 	}
-	return s.gutShot(card)
+	up := s.board.upStairLen(card.Value()+1) + 1
+	up2 := s.board.upStairLen(card.Value() + up + 1)
+	return up == 4 || up+up2 >= 4
 }
 func (s *Selector) pocketPairLessBoardCount(count uint8) bool {
 	return s.isPokerPair() && s.board.graterValuesCount[s.poketPairValue()] == count
@@ -147,8 +148,18 @@ func (s *Selector) poketPairValue() uint8 {
 }
 func (s *Selector) twoWaySD(card types.Card) bool {
 	up := s.total.upStairLen(card.Value())
-	down := s.total.downStairLen(card.Value() - 1)
-	return s.total.isOpenUpStair(card.Value()) && s.total.isOpenDownStair(card.Value()) && up+down == 4
+	down := s.total.downStairLen(card.Value())
+	size := up + down - 1
+	if s.total.isOpenUpStair(card.Value()) && s.total.isOpenDownStair(card.Value()) && size == 4 {
+		return true
+	}
+	if size+s.total.upStairLen(card.Value()+up+1) >= 4 &&
+		s.total.upStairLen(card.Value()+up+1) > 0 &&
+		s.total.downStairLen(card.Value()-down-1) > 0 &&
+		size+s.total.downStairLen(card.Value()-down-1) >= 4 {
+		return true
+	}
+	return false
 }
 func (s *Selector) handTwoWaySD() bool {
 	return s.twoWaySD(s.firstCard()) || s.twoWaySD(s.secondCard())
@@ -210,7 +221,7 @@ func (s *Selector) downGutshotWhole(card types.Card) bool {
 	if size >= 4 {
 		return false
 	}
-	return s.total.downStairLen(card.Value()-down-1)+size == 4
+	return s.total.downStairLen(card.Value()-down-1)+size >= 4
 }
 func (s *Selector) gutShotWhole(card types.Card) bool {
 	return s.upGutshotWhole(card) || s.downGutshotWhole(card)
@@ -273,14 +284,14 @@ func (ci *cardsInfo) upStairLen(value uint8) uint8 {
 }
 func (ci *cardsInfo) isOpenUpStair(value uint8) bool {
 	size := ci.upStairLen(value)
-	return value+size-1 < 12
+	return value+size < 12+1
 }
 func (ci *cardsInfo) isOpenDownStair(value uint8) bool {
 	size := ci.downStairLen(value)
 	if size == 0 {
 		return false
 	}
-	return value-size+1 > 0
+	return value+1 > size
 }
 func (ci *cardsInfo) downStairLen(value uint8) uint8 {
 	if value > 12 {

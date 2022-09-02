@@ -6,7 +6,7 @@ big_range = """{"info":"preflop_range:f:f:f:f:b7:stack:150:pos:BU","2d2c":1,"2h2
 
 
 def run_combos(board, hands) -> dict:
-    bin_path = './cmd/go-poker-combinations/go-poker-combinations'
+    bin_path = './cmd/go-poker-combinations-linux-macos/go-poker-combinations-linux-macos'
     assert os.path.exists(bin_path), 'have no combinations executable'
     # subprocess.Popen(board, executable=bin_path).communicate()
     return json.loads(subprocess.run([bin_path, '--hands', ','.join(hands), board], capture_output=True).stdout)

@@ -33,7 +33,6 @@ func newCardsInfo(cards []types.Card) (ci cardsInfo) {
 	}
 	ci.minValue = 12
 	for _, card := range cards {
-		//ci.chart[card.Suit()][card.Value()] = true
 		ci.suits[card.Suit()]++
 		ci.maxSameSuitsCount = generics.Max(ci.maxSameSuitsCount, ci.suits[card.Suit()])
 		ci.values[card.Value()]++
@@ -42,26 +41,20 @@ func newCardsInfo(cards []types.Card) (ci cardsInfo) {
 		ci.minValue = generics.Min(ci.minValue, card.Value())
 		ci.maxSameValues = generics.Max(ci.maxSameValues, ci.values[card.Value()])
 	}
-	//for suit := 0; suit < 4; suit++ {
-	//	for value := 12; value >= 0; value-- {
-	//		if !ci.chart[suit][value] {
-	//			ci.maxFreeValue[suit] = uint8(value)
-	//			break
-	//		}
-	//	}
-	//}
 	order := uint8(1)
 	maxOrder := uint8(0)
+	graterCount := uint8(0)
 	for i := 12; i >= 0; i-- {
+		ci.graterValuesCount[i] = graterCount
 		if ci.values[i] > 0 {
 			ci.valueOrder[i] = order
 			order++
 			maxOrder++
+			graterCount += ci.values[i]
 		} else {
 			maxOrder = 0
 		}
 		ci.stairsUpLen[i] = maxOrder
-		ci.graterValuesCount[i] = order - 1
 		if maxOrder > ci.maxOrderLen {
 			ci.maxOrderLen = maxOrder
 			ci.maxOrderIdx = uint8(i)
