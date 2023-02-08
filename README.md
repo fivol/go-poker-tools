@@ -28,6 +28,7 @@ if weight omitted, it stands as 1.
 ```
 go build .
 ```
+Go to [cmd README](./cmd/go-poker-combinations/README.md)
 
 ## Usage Examples
 ```
