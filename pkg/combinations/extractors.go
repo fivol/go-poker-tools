@@ -171,7 +171,16 @@ func (s *Selector) handOneCardSD() bool {
 	return s.gutShot(s.firstCard()) || s.gutShot(s.secondCard())
 }
 func (s *Selector) SD(card types.Card) bool {
-	return s.total.upStairLen(card.Value())+s.total.downStairLen(card.Value())-1 == 4
+	up := s.total.upStairLen(card.Value())
+	down := s.total.downStairLen(card.Value())
+	if card.Value() == 12 {
+		if up > down {
+			down = 1
+		} else {
+			up = 1
+		}
+	}
+	return up+down-1 == 4
 }
 func (s *Selector) FD() bool {
 	return s.maxSuitsWithHand() == 4

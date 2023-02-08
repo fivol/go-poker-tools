@@ -495,12 +495,12 @@ func TestCombinations(t *testing.T) {
 		{
 			"Ks2c2d",
 			"As3s",
-			"good_gutshot",
+			"ahigh",
 		},
 		{
 			"Ks2c2d",
 			"AsQd",
-			"good_gutshot",
+			"ahigh",
 		},
 		{
 			"Ks2c2d",
@@ -526,6 +526,11 @@ func TestCombinations(t *testing.T) {
 			"7c7d9c",
 			"4s4d",
 			"under_pocket",
+		},
+		{
+			"9c3d2h",
+			"KcAc",
+			"ahigh",
 		},
 	}
 	skipCombos := map[int][]Comb{
