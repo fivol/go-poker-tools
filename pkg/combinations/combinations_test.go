@@ -542,6 +542,36 @@ func TestCombinations(t *testing.T) {
 			"KhQh",
 			"high_straight",
 		},
+		{
+			"Ac2h3d4s5d",
+			"6d7d",
+			"high_straight",
+		},
+		{
+			"Ac2h3d4s5d",
+			"5c6d",
+			"straight",
+		},
+		{
+			"9cTdJsQhKd",
+			"AcKh",
+			"high_straight",
+		},
+		{
+			"2h3h4h5h6h",
+			"6d7h",
+			"straight_flush",
+		},
+		{
+			"2h3h4h6h7h",
+			"Ah3d",
+			"flush",
+		},
+		{
+			"2c2d2h2s3c",
+			"AhAc",
+			"high_overpair",
+		},
 	}
 	skipCombos := map[int][]Comb{
 		66:  {"top_set", "medium_set"},
@@ -562,6 +592,8 @@ func TestCombinations(t *testing.T) {
 		95:  {"high_overpair_fd"},
 		100: {"good_oesd"},
 		104: {"high_straight"},
+		107: {"high_straight"},
+		110: {"high_flush_j"},
 	}
 	allCombos := GetAllCombos()
 	for i, testCase := range table {
