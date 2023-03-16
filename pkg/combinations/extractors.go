@@ -221,7 +221,7 @@ func (ci *cardsInfo) getStraight() (bool, uint8) {
 	if ci.maxOrderLen < 5 {
 		return false, 0
 	}
-	return true, ci.maxOrderIdx
+	return true, ci.maxOrderIdx + ci.maxOrderLen - 5
 }
 func (s *Selector) downGutshotWhole(card types.Card) bool {
 	down := s.total.downStairLen(card.Value())
@@ -242,7 +242,10 @@ func (s *Selector) HasFlush(card types.Card) bool {
 	if s.board.suits[card.Suit()] < 5 {
 		return true
 	}
-	return s.board.graterValuesCount[card.Value()] < 5
+	if s.board.graterValuesCount[card.Value()] < 5 {
+		return true
+	}
+	return false
 }
 func (s *Selector) pairHandBoardIdx(card types.Card) uint8 {
 	return s.board.valueOrder[card.Value()]
