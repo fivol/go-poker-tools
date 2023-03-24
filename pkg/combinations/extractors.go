@@ -292,6 +292,12 @@ func (ci *cardsInfo) upStairLen(value uint8) uint8 {
 	if value < 0 {
 		return 0
 	}
+	if value == 12 {
+		if ci.values[12] > 0 {
+			return 1
+		}
+		return 0
+	}
 	return ci.stairsUpLen[value]
 }
 func (ci *cardsInfo) isOpenUpStair(value uint8) bool {
