@@ -87,8 +87,9 @@ func (s *Selector) badGutShotCard(card types.Card) bool {
 	up2 := s.board.upStairLen(card.Value() + up + 1)
 	return up == 4 || up+up2 >= 4
 }
-func (s *Selector) pocketPairLessBoardCount(count uint8) bool {
-	return s.isPokerPair() && s.board.graterValuesCount[s.poketPairValue()] == count
+func (s *Selector) pocketPairLessBoardValuesCount(count uint8) bool {
+	graterValues := s.total.valueOrder[s.poketPairValue()] - 1
+	return s.isPokerPair() && graterValues == count
 }
 func (s *Selector) getFDIdx(fd FD) int {
 	for i, topFD := range s.topFDs {
@@ -283,7 +284,7 @@ func (s *Selector) maxSuitsWithHand() uint8 {
 	return generics.Max(s.total.suits[s.hand.cards[0].Suit()], s.total.suits[s.hand.cards[1].Suit()])
 }
 func (s *Selector) isPokerPairGraterBoard() bool {
-	return s.pocketPairLessBoardCount(0)
+	return s.pocketPairLessBoardValuesCount(0)
 }
 func (ci *cardsInfo) upStairLen(value uint8) uint8 {
 	if value > 12 {
@@ -675,7 +676,7 @@ func findPocketTop2(s *Selector) bool {
 		pocket_tp_2
 		Карманная пара ниже одной карты борда
 	*/
-	return s.pocketPairLessBoardCount(1)
+	return s.pocketPairLessBoardValuesCount(1)
 }
 
 func findSecondFD13Nuts(s *Selector) bool {
@@ -786,7 +787,7 @@ func findPocketBetween23(s *Selector) bool {
 		pocket_between_2_3
 		Карманная пара ниже двух карт борда
 	*/
-	return s.pocketPairLessBoardCount(2)
+	return s.isPokerPair() && s.board.graterValuesCount[s.poketPairValue()] == 2
 }
 
 func find3dHands(s *Selector) bool {
@@ -862,7 +863,7 @@ func findUnderPocket(s *Selector) bool {
 		under_pocket
 		Карманная пара ниже всех карт борда
 	*/
-	return s.pocketPairLessBoardCount(s.boardCardsCount())
+	return s.isPokerPair() && s.board.minValue > s.firstCard().Value()
 }
 
 func findUnderPocketFD12Nuts(s *Selector) bool {

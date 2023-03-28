@@ -577,6 +577,31 @@ func TestCombinations(t *testing.T) {
 			"AhQh",
 			"ahigh",
 		},
+		{
+			"2dQsQd",
+			"5h5s",
+			"pocket_tp_2",
+		},
+		{
+			"AsAc2d",
+			"8s8d",
+			"pocket_tp_2",
+		},
+		{
+			"AsAc9d",
+			"8s8d",
+			"under_pocket",
+		},
+		{
+			"AsKs3d",
+			"QsQd",
+			"pocket_between_2_3",
+		},
+		{
+			"AsAc3d",
+			"QsQd",
+			"pocket_tp_2",
+		},
 	}
 	skipCombos := map[int][]Comb{
 		66:  {"top_set", "medium_set"},
