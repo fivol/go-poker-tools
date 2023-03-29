@@ -602,6 +602,16 @@ func TestCombinations(t *testing.T) {
 			"QsQd",
 			"pocket_tp_2",
 		},
+		{
+			"AhTcAc",
+			"QdQh",
+			"pocket_tp_2",
+		},
+		{
+			"Ts3cTd",
+			"6h6c",
+			"pocket_tp_2",
+		},
 	}
 	skipCombos := map[int][]Comb{
 		66:  {"top_set", "medium_set"},
