@@ -1,2 +1,5 @@
 .idea/
 .ipynb_checkpoints
+.DS_Store
+go-poker-combinations-linux
+go-poker-combinations-macos

@@ -6,8 +6,8 @@ import (
 )
 
 type cardsInfo struct {
-	cards []types.Card
-	//chart  [4][13]bool
+	cards  []types.Card
+	chart  [4][13]bool
 	suits  [4]uint8
 	values [13]uint8
 
@@ -34,6 +34,7 @@ func newCardsInfo(cards []types.Card) (ci cardsInfo) {
 	ci.minValue = 12
 	for _, card := range cards {
 		ci.suits[card.Suit()]++
+		ci.chart[card.Suit()][card.Value()] = true
 		ci.maxSameSuitsCount = generics.Max(ci.maxSameSuitsCount, ci.suits[card.Suit()])
 		ci.values[card.Value()]++
 		ci.maxValueSuits[card.Suit()] = generics.Max(ci.maxValueSuits[card.Suit()], card.Value())

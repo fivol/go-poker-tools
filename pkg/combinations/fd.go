@@ -11,7 +11,7 @@ func (s *Selector) getFDList() FDList {
 		if suitsCount == 3 || suitsCount == 2 {
 			fdCount := 0
 			for i := 12; i >= 0 && fdCount < 4; i-- {
-				if s.board.values[i] == 0 {
+				if !s.board.chart[suit][i] {
 					fdCount++
 					fds[i] = true
 				}
