@@ -61,6 +61,13 @@ func readHands(input io.Reader, board types.Board) types.HandsList {
 	return handsList
 }
 
+func printCombos() {
+	combos := combinations.GetAllCombos()
+	for _, comb := range combos {
+		fmt.Println(comb)
+	}
+}
+
 func main() {
 	var combosArg = flag.String("combos", "", "list of combos to use: trips,top_set,medium_set (use all by default)")
 	var handsArg = flag.String("hands", "", "list of hands: 2s2d,KcQd")
@@ -69,6 +76,10 @@ func main() {
 		panic("Must specify board with first argument")
 	}
 	t0 := time.Now()
+	if flag.Args()[0] == "combinations" {
+		printCombos()
+		return
+	}
 	board := types.ParseBoard(flag.Args()[0])
 	var hands types.HandsList
 	if *handsArg != "" {

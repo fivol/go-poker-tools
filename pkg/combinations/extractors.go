@@ -589,12 +589,23 @@ func findOESD(s *Selector) bool {
 }
 
 func findTPGSH(s *Selector) bool {
-	// tp_gsh
+	/*
+		tp_gsh
+		Пара с высшей картой стола и вторая карта образует стритдро на одну карту
+		(на терне вышла карта ниже самой высокой карты флопа и у нас осталось совпадение с самой высокой картой доски)
+	*/
 	var otherIdx = 0
 	if s.board.valueOrder[s.hand.cards[0].Value()] != 1 {
 		otherIdx = 1
 	}
-	return findTP(s) && s.gutShot(s.hand.cards[otherIdx])
+	trueOnFlop := findTP(s) && s.gutShot(s.hand.cards[otherIdx])
+	if !trueOnFlop {
+		return false
+	}
+	if len(s.board.cards) > 3 {
+		return s.board.graterValuesCount[s.board.cards[3].Value()] > 0
+	}
+	return true
 }
 
 func findTP(s *Selector) bool {
@@ -674,9 +685,11 @@ func findPocketTP2GSH(s *Selector) bool {
 func findPocketTop2(s *Selector) bool {
 	/*
 		pocket_tp_2
-		Карманная пара ниже одной карты борда
+		Карманная пара ниже одной карты борда.
+		Если на борде есть 2 карты одного номинала,
+		то карманная пара должна быть выше одиночной карты борда и ниже карт одинакого номинала
 	*/
-	return s.pocketPairLessBoardValuesCount(1)
+	return s.pocketPairLessBoardValuesCount(1) && s.board.values[s.board.minValue] == 1
 }
 
 func findSecondFD13Nuts(s *Selector) bool {
@@ -785,9 +798,19 @@ func findPocketBetween23GSH(s *Selector) bool {
 func findPocketBetween23(s *Selector) bool {
 	/*
 		pocket_between_2_3
-		Карманная пара ниже двух карт борда
+		Карманная пара ниже двух карт борда.
+		Если на борде есть 2 карты одинакого номинала,
+		то карманная пара ниже одиночной карты борда и выше карт борда одинакого номинала
 	*/
-	return s.isPokerPair() && s.board.graterValuesCount[s.poketPairValue()] == 2
+	if !s.isPokerPair() {
+		return false
+	}
+	if s.board.graterValuesCount[s.poketPairValue()] == 2 {
+		return true
+	}
+	return s.board.graterValuesCount[s.poketPairValue()] == 1 &&
+		s.board.values[s.board.minValue] == 2 &&
+		s.board.values[s.poketPairValue()] == 0
 }
 
 func find3dHands(s *Selector) bool {
@@ -990,7 +1013,7 @@ func findGoodOESD(s *Selector) bool {
 func findGoodGutShot(s *Selector) bool {
 	/*
 		good_gutshot
-		Все остальные гатшоты, которые не вошли в категорию bad gutShotWhole
+		Все остальные гатшоты, которые не вошли в категорию bad gutshot
 	*/
 	return s.handOneCardSD() && !findBadGutShot(s)
 }
