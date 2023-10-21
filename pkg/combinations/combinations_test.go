@@ -637,6 +637,73 @@ func TestCombinations(t *testing.T) {
 			"7s7d",
 			"pocket_between_2_3",
 		},
+		// AdQd 2d7hQs                           As8s 8h2h5s	tp_bdfd_nuts
+		{
+			"2d7hQs",
+			"AdQd",
+			"tp_bdfd_nuts",
+		},
+		{
+			"8h2h5s",
+			"As8s",
+			"tp_bdfd_nuts",
+		},
+		// Ah6h Th6s5s                           Ac6c 6d3sQc	2nd_bdfd_nuts
+		{
+			"Th6s5s",
+			"Ah6h",
+			"2nd_bdfd_nuts",
+		},
+		{
+			"6d3sQc",
+			"Ac6c",
+			"2nd_bdfd_nuts",
+		},
+		// Ah3h KdTh3s                           Ad5d TdJc5c	3nd_bdfd_nuts
+		{
+			"KdTh3s",
+			"Ah3h",
+			"3nd_bdfd_nuts",
+		},
+		{
+			"TdJc5c",
+			"Ad5d",
+			"3nd_bdfd_nuts",
+		},
+		// Ad9d Td8h7s                           AsTs 8s9c7c	oesd_bdfd_nuts
+		{
+			"Td8h7s",
+			"Ad9d",
+			"oesd_bdfd_nuts",
+		},
+		{
+			"8s9c7c",
+			"AsTs",
+			"oesd_bdfd_nuts",
+		},
+		// AsTs Jh7h8s                           Ad5d Jd3s2s	gutshot_bdfd_nuts
+		{
+			"Jh7h8s",
+			"AsTs",
+			"gutshot_bdfd_nuts",
+		},
+		{
+			"Jd3s2s",
+			"Ad5d",
+			"gutshot_bdfd_nuts",
+		},
+		// AcKc 5d5h4c                           AdTd 2d5h8s	overcards_bdfd_nuts
+		{
+			"5d5h4c",
+			"AcKc",
+			"overcards_bdfd_nuts",
+		},
+		{
+			"2d5h8s",
+			"AdTd",
+			"overcards_bdfd_nuts",
+		},
+
 	}
 	skipCombos := map[int][]Comb{
 		66:  {"top_set", "medium_set"},

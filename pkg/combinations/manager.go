@@ -88,6 +88,13 @@ var combinations = []ExtractorWithName{
 	{findTopCards, "top_cards"},
 	{findOverCards, "overcards"},
 	{findNomade, "nomade"},
+
+	{findTPBDFDNuts, "tp_bdfd_nuts"},
+	{find2ndBDFDNuts, "2nd_bdfd_nuts"},
+	{find3ndBDFDNuts, "3nd_bdfd_nuts"},
+	{findOESDBDFDNuts, "oesd_bdfd_nuts"},
+	{findGutShotBDFDNuts, "gutshot_bdfd_nuts"},
+	{findOverCardsBDFDNuts, "overcards_bdfd_nuts"},
 }
 
 func GetAllCombos() []Comb {

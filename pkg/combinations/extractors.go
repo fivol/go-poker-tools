@@ -286,6 +286,49 @@ func (s *Selector) maxSuitsWithHand() uint8 {
 func (s *Selector) isPokerPairGraterBoard() bool {
 	return s.pocketPairLessBoardValuesCount(0)
 }
+
+func (s *Selector) isBDFD() bool {
+	/*
+		bdfd
+		бекдорное флешдро
+		2 карты одной масти у нас и 1 карта такой же масти на борде
+	*/
+	return s.handSameSuit() && s.board.suits[s.firstCard().Suit()] == 1
+}
+
+func (s *Selector) isTopBDFD() bool {
+	/*
+		top_bdfd
+		сильнейшее бекдорное флешдро, которое может быть на этой доске
+		"сильнейшее когда среди трех карт и туз и король"
+	*/
+	if !s.isBDFD() {
+		return false
+	}
+	values := [3]uint8{}
+	values[0] = s.firstCard().Value()
+	values[1] = s.secondCard().Value()
+	values[2] = s.board.maxValueSuits[s.firstCard().Suit()]
+	counter := 0
+	for _, value := range values {
+		// A or K
+		if value == 12 || value == 11 {
+			counter++
+		}
+	}
+	return counter == 2
+}
+
+func (s *Selector) isTPBDFDNutsN(pairIndex uint8) bool {
+	if !s.isTopBDFD() {
+		return false
+	}
+	if s.pairWithBoardIdx() != pairIndex {
+		return false
+	}
+	return true
+}
+
 func (ci *cardsInfo) upStairLen(value uint8) uint8 {
 	if value > 12 {
 		return 0
@@ -1033,4 +1076,61 @@ func findBadGutShot(s *Selector) bool {
 		Гатшот на одну карту, которая ниже всех карт борда
 	*/
 	return s.badGutShotCard(s.firstCard()) || s.badGutShotCard(s.secondCard())
+}
+
+
+func findTPBDFDNuts(s *Selector) bool {
+	/*
+		tp_bdfd_nuts
+		Пара с высшей картой со стола и сильнейшее бекдорное флешдро, 
+		которое может быть на этой доске
+	*/
+	return s.isTPBDFDNutsN(1)
+}
+
+func find2ndBDFDNuts(s *Selector) bool {
+	/*
+		2nd_bdfd_nuts
+		Совпадение одной из наших карманных карт со второй по номиналу картой борда и 
+		сильнейшее бекдорное флешдро, которое может быть на этой доске
+	*/
+	return s.isTPBDFDNutsN(2)
+}
+
+func find3ndBDFDNuts(s *Selector) bool {
+	/*
+		3nd_bdfd_nuts
+		Совпадение одной из наших карманных карт с третьей по номиналу картой борда и 
+		сильнейшее бекдорное флешдро, которое может быть на этой доске
+	*/
+	return s.isTPBDFDNutsN(3)
+}
+
+func findOESDBDFDNuts(s *Selector) bool {
+	/*
+		oesd_bdfd_nuts
+		Двухстороннее Стритдро, для составления стрита которому необходима 
+		одна карта и используется хотя бы одна карта, которая у нас на руках и 
+		сильнейшее бекдорное флешдро, которое может быть на этой доске
+	*/
+	return s.isTopBDFD() && s.handTwoWaySD()
+}
+
+func findGutShotBDFDNuts(s *Selector) bool {
+	/*
+		gutshot_bdfd_nuts
+		Стритдро, для составления стрита которому необходима одна карта и 
+		используется хотя бы одна карта, которая у нас на руках и 
+		сильнейшее бекдорное флешдро, которое может быть на этой доске
+	*/
+	return s.isTopBDFD() && s.handOneCardSD()
+}
+
+func findOverCardsBDFDNuts(s *Selector) bool {
+	/*
+		overcards_bdfd_nuts
+		Карманные карты, обе из которых выше карт борда 
+		и сильнейшее бекдорное флешдро, которое может быть на этой доске
+	*/
+	return s.isTopBDFD() && s.hand.minValue > s.board.maxValue
 }
