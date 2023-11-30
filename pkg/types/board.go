@@ -14,7 +14,6 @@ func (board *Board) Intersects(hand Hand) bool {
 	c1, c2 := hand.Cards()
 	for _, h := range *board {
 		if h == c1 || h == c2 {
-			println("Intersects", h.ToString())
 			return true
 		}
 	}

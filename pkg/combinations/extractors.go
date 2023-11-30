@@ -120,14 +120,23 @@ func (s *Selector) hasFD() bool {
 func (s *Selector) isTopFD() bool {
 	return s.isFDBetween(1, 1)
 }
-func (s *Selector) inStraightMiddle(card types.Card) bool {
-	if card.Value() == 0 {
+func (s *Selector) haveABottomStraight() bool {
+	return s.total.upStairLen(0) == 4 && s.total.values[12] != 0
+}
+func (s *Selector) notStraightButtom(card types.Card) bool {
+	if card.Value() == 0 && !s.haveABottomStraight() {
 		return false
 	}
 	if s.total.downStairLen(card.Value()-1) == 0 {
 		return false
 	}
-	return s.total.upStairLen(card.Value()+1)+s.total.downStairLen(card.Value()-1)+1 >= 5
+	if s.total.upStairLen(card.Value()+1)+s.total.downStairLen(card.Value()-1)+1 < 5 {
+		return false
+	}
+	if s.total.upStairLen(card.Value()) >= 5 {
+		return false
+	}
+	return true
 }
 func (s *Selector) isWeakFD() bool {
 	return s.isFDBetween(4, 10)
@@ -182,6 +191,23 @@ func (s *Selector) SD(card types.Card) bool {
 		}
 	}
 	return up+down-1 == 4
+}
+func (s *Selector) BoardSDWith(card types.Card) bool {
+	if card.Value() == 12 {
+		if s.board.upStairLen(0)+1 == 4 {
+			return true
+		}
+		if s.board.downStairLen(11)+1 == 4 {
+			return true
+		}
+		return false
+	}
+	if card.Value() == 0 {
+		return s.board.upStairLen(1)+1 == 4
+	}
+	up := s.board.upStairLen(card.Value() + 1)
+	down := s.board.downStairLen(card.Value() - 1)
+	return up+down+1 == 4
 }
 func (s *Selector) FD() bool {
 	return s.maxSuitsWithHand() == 4
@@ -300,23 +326,26 @@ func (s *Selector) isTopBDFD() bool {
 	/*
 		top_bdfd
 		сильнейшее бекдорное флешдро, которое может быть на этой доске
-		"сильнейшее когда среди трех карт и туз и король"
+		top fdbd - это когда при выложенном флопе есть 3 карты одной масти 
+		(2 у нас на руках и одна на флопе или 2 на флопе и 1 на руках) 
+		и одна из карт у нас на руках является наивысшей для составления флеша 
+		(As на доске 8s7s3c, Ks на доске As8s3c)
 	*/
-	if !s.isBDFD() {
-		return false
-	}
-	values := [3]uint8{}
-	values[0] = s.firstCard().Value()
-	values[1] = s.secondCard().Value()
-	values[2] = s.board.maxValueSuits[s.firstCard().Suit()]
-	counter := 0
-	for _, value := range values {
-		// A or K
-		if value == 12 || value == 11 {
-			counter++
+	
+	for i := 0; i < 4; i ++ {
+		if s.total.suits[i] != 3 {
+			continue
+		}
+		if s.hand.suits[i] == 0 {
+			continue
+		}
+		for value := 12; value >= 0; value -- {
+			if !s.board.chart[i][value] {
+				return s.hand.chart[i][value]
+			}
 		}
 	}
-	return counter == 2
+	return false
 }
 
 func (s *Selector) isTPBDFDNutsN(pairIndex uint8) bool {
@@ -327,6 +356,13 @@ func (s *Selector) isTPBDFDNutsN(pairIndex uint8) bool {
 		return false
 	}
 	return true
+}
+
+func (s *Selector) isTopOverpairTA() bool {
+	/*
+		Оверпара от TT до AA включительно
+	*/
+	return s.isPokerPairGraterBoard() && s.poketPairValue() >= 8
 }
 
 func (ci *cardsInfo) upStairLen(value uint8) uint8 {
@@ -446,13 +482,15 @@ func findStraight(s *Selector) bool {
 func findHighStraight(s *Selector) bool {
 	/*
 		high_straight
-		Стрит с использованием 4 карт борда и 1 карты с руки и эта карта не
-		является первой (младшей, за исключением случая, когда стрит A2345) картой в стрите
+		Стрит с использованием, как минимум, 1 карты с руки и эта карта не является первой
+		(младшей, за исключением случая, когда стрит A2345) картой в стрите
 	*/
 	if !findStraight(s) {
 		return false
 	}
-	return s.inStraightMiddle(s.firstCard()) || s.inStraightMiddle(s.secondCard())
+	first := s.notStraightButtom(s.firstCard())
+	second := s.notStraightButtom(s.secondCard())
+	return first || second
 }
 
 func findLowStraight(s *Selector) bool {
@@ -1078,11 +1116,11 @@ func findBadGutShot(s *Selector) bool {
 	return s.badGutShotCard(s.firstCard()) || s.badGutShotCard(s.secondCard())
 }
 
-
 func findTPBDFDNuts(s *Selector) bool {
 	/*
 		tp_bdfd_nuts
-		Пара с высшей картой со стола и сильнейшее бекдорное флешдро, 
+		Пара с высшей картой со стола и сильнейшее бекдорное флешдро 
+		(то есть 2 карты одной масти у нас и 1 карта такой же масти на борде), 
 		которое может быть на этой доске
 	*/
 	return s.isTPBDFDNutsN(1)
@@ -1091,7 +1129,7 @@ func findTPBDFDNuts(s *Selector) bool {
 func find2ndBDFDNuts(s *Selector) bool {
 	/*
 		2nd_bdfd_nuts
-		Совпадение одной из наших карманных карт со второй по номиналу картой борда и 
+		Совпадение одной из наших карманных карт со второй по номиналу картой борда и
 		сильнейшее бекдорное флешдро, которое может быть на этой доске
 	*/
 	return s.isTPBDFDNutsN(2)
@@ -1100,7 +1138,7 @@ func find2ndBDFDNuts(s *Selector) bool {
 func find3ndBDFDNuts(s *Selector) bool {
 	/*
 		3nd_bdfd_nuts
-		Совпадение одной из наших карманных карт с третьей по номиналу картой борда и 
+		Совпадение одной из наших карманных карт с третьей по номиналу картой борда и
 		сильнейшее бекдорное флешдро, которое может быть на этой доске
 	*/
 	return s.isTPBDFDNutsN(3)
@@ -1109,8 +1147,8 @@ func find3ndBDFDNuts(s *Selector) bool {
 func findOESDBDFDNuts(s *Selector) bool {
 	/*
 		oesd_bdfd_nuts
-		Двухстороннее Стритдро, для составления стрита которому необходима 
-		одна карта и используется хотя бы одна карта, которая у нас на руках и 
+		Двухстороннее Стритдро, для составления стрита которому необходима
+		одна карта и используется хотя бы одна карта, которая у нас на руках и
 		сильнейшее бекдорное флешдро, которое может быть на этой доске
 	*/
 	return s.isTopBDFD() && s.handTwoWaySD()
@@ -1119,8 +1157,8 @@ func findOESDBDFDNuts(s *Selector) bool {
 func findGutShotBDFDNuts(s *Selector) bool {
 	/*
 		gutshot_bdfd_nuts
-		Стритдро, для составления стрита которому необходима одна карта и 
-		используется хотя бы одна карта, которая у нас на руках и 
+		Стритдро, для составления стрита которому необходима одна карта и
+		используется хотя бы одна карта, которая у нас на руках и
 		сильнейшее бекдорное флешдро, которое может быть на этой доске
 	*/
 	return s.isTopBDFD() && s.handOneCardSD()
@@ -1129,8 +1167,276 @@ func findGutShotBDFDNuts(s *Selector) bool {
 func findOverCardsBDFDNuts(s *Selector) bool {
 	/*
 		overcards_bdfd_nuts
-		Карманные карты, обе из которых выше карт борда 
+		Карманные карты, обе из которых выше карт борда
 		и сильнейшее бекдорное флешдро, которое может быть на этой доске
 	*/
 	return s.isTopBDFD() && s.hand.minValue > s.board.maxValue
+}
+
+func findOverpairFDNuts(s *Selector) bool {
+	/*
+		high_overpair_fd_nuts
+		Оверпара от TT до AA включительно и сильнейшее флешдро, которое может быть на этой доске
+	*/
+	return s.isTopOverpairTA() && s.isTopFD()
+}
+
+func findOverpairFD2Nuts(s *Selector) bool {
+	/*
+		high_overpair_fd_2nuts
+		Оверпара от TT до AA включительно и имеющая 2 по силе флешдро, которое может быть на этой доске
+	*/
+	return s.isTopOverpairTA() && s.isFDBetween(2, 2)
+}
+
+func findOverpairFD3Nuts(s *Selector) bool {
+	/*
+		high_overpair_fd_3nuts
+		Оверпара от TT до AA включительно и имеющая 3 по силе флешдро, которое может быть на этой доске
+	*/
+	return s.isTopOverpairTA() && s.isFDBetween(3, 3)
+}
+
+func findOverpairFD4Nuts(s *Selector) bool {
+	/*
+		high_overpair_fd_4nuts
+		Оверпара от TT до AA включительно и имеющая 4е или ниже по силе флешдро, которое может быть на этой доске
+	*/
+	return s.isTopOverpairTA() && s.isFDBetween(4, 100)
+}
+
+func findTPFDNuts(s *Selector) bool {
+	/*
+		tp_fd_nuts
+		Пара с высшей картой со стола и сильнейшее флешдро, которое может быть на этой доске
+	*/
+	return s.handPairTopBoard() && s.isTopFD()
+}
+
+func findTPFD2Nuts(s *Selector) bool {
+	/*
+		tp_fd_2nuts
+		Пара с высшей картой со стола и имеющая 2 по силе флешдро, которое может быть на этой доске
+	*/
+	return s.handPairTopBoard() && s.isFDBetween(2, 2)
+}
+
+func findTPFD3Nuts(s *Selector) bool {
+	/*
+		tp_fd_3nuts
+		Пара с высшей картой со стола и имеющая 3 по силе флешдро, которое может быть на этой доске
+	*/
+	return s.handPairTopBoard() && s.isFDBetween(3, 3)
+}
+
+func findTPFD4Nuts(s *Selector) bool {
+	/*
+		tp_fd_4nuts
+		Пара с высшей картой со стола и имеющая 4е или ниже по силе флешдро, которое может быть на этой доске
+	*/
+	return s.handPairTopBoard() && s.isFDBetween(4, 100)
+}
+
+func findPocketTP2FDNuts(s *Selector) bool {
+	/*
+		pocket_tp_2_fd_nuts
+		Карманная пара ниже одной карты борда и имеющая сильнейшее флешдро, которое может быть на этой доске
+	*/
+	return s.pocketPairLessBoardValuesCount(1) && s.isTopFD()
+}
+
+func findPocketTP2FD2Nuts(s *Selector) bool {
+	/*
+		pocket_tp_2_fd_2_nuts
+		Карманная пара ниже одной карты борда и имеющая 2е по силе флешдро, которое может быть на этой доске
+	*/
+	return s.pocketPairLessBoardValuesCount(1) && s.isFDBetween(2, 2)
+}
+
+func findPocketTP2FD3Nuts(s *Selector) bool {
+	/*
+		pocket_tp_2_fd_3_nuts
+		Карманная пара ниже одной карты борда и имеющая 3е по силе флешдро, которое может быть на этой доске
+	*/
+	return s.pocketPairLessBoardValuesCount(1) && s.isFDBetween(3, 3)
+}
+
+func find2FDNuts(s *Selector) bool {
+	/*
+		2nd_fd_nuts
+		Совпадение одной из наших карманных карт со второй по номиналу картой борда плюс флешдро,
+		которое имеет сильнейшее по силе флешдро по номиналу карты, образующее это флешдро
+		 (на основе номинала карты, образующей флешдро)
+	*/
+	return s.pairWithBoardIdx() == 2 && s.isTopFD()
+}
+
+func find2FD2Nuts(s *Selector) bool {
+	/*
+		2nd_fd_2_nuts
+		Совпадение одной из наших карманных карт со второй по номиналу картой борда плюс флешдро,
+		которое имеет 2е по силе флешдро по номиналу карты, образующее это флешдро
+		 (на основе номинала карты, образующей флешдро)
+	*/
+	return s.pairWithBoardIdx() == 2 && s.isFDBetween(2, 2)
+}
+
+func find2FD3Nuts(s *Selector) bool {
+	/*
+		2nd_fd_3_nuts
+		Совпадение одной из наших карманных карт со второй по номиналу картой борда плюс флешдро,
+		которое имеет 3е по силе флешдро по номиналу карты, образующее это флешдро
+		 (на основе номинала карты, образующей флешдро)
+	*/
+	return s.pairWithBoardIdx() == 2 && s.isFDBetween(3, 3)
+}
+
+func findGutShotFD2Cards(s *Selector) bool {
+	/*
+		fd_gsh_fd_2_cards
+		Флешдро, для которого используются обе наших карты на руках+стритдро на 1 карту
+	*/
+	return s.handSameSuit() && s.FD() && s.handOneCardSD()
+}
+
+func findFDOESDFD1Card(s *Selector) bool {
+	/*
+		fd_oesd_fd_1_card
+		Флешдро, для которого используется одна наша карта на руках+двустороннее стритдро
+	*/
+	return !s.handSameSuit() && s.FD() && s.handTwoWaySD()
+}
+
+func findGutShotFD1Cards(s *Selector) bool {
+	/*
+		fd_gsh_fd_1_card
+		Флешдро, для которого используется одна наша карта на руках+стритдро на 1 карту
+	*/
+	return !s.handSameSuit() && s.FD() && s.handOneCardSD()
+}
+
+func findPocketBetween23FD2Nuts(s *Selector) bool {
+	/*
+		pocket_between_2_3_fd_2_nuts
+		Карманная пара ниже двух карт борда и имеющая 2е по силе флешдро
+	*/
+	return s.pocketPairLessBoardValuesCount(2) && s.isFDBetween(2, 2)
+}
+
+func findPocketBetween23FD3Nuts(s *Selector) bool {
+	/*
+		pocket_between_2_3_fd_3_nuts
+		Карманная пара ниже двух карт борда и имеющая 3е по силе флешдро
+	*/
+	return s.pocketPairLessBoardValuesCount(2) && s.isFDBetween(3, 3)
+}
+
+func find3dHandsFD2Nuts(s *Selector) bool {
+	/*
+		3d_hands_fd_2_nuts
+		Совпадение одной из наших карманных карт с третьей по номиналу картой борда плюс флешдро,
+		которое входит в топ-2 по номиналу карты, образующее это флешдро
+		 (на основе номинала карты, образующей флешдро)
+	*/
+	return s.pocketPairLessBoardValuesCount(3) && s.isFDBetween(1, 2)
+}
+
+func find3dHandsFD3Nuts(s *Selector) bool {
+	/*
+		3d_hands_fd_3_nuts
+		Совпадение одной из наших карманных карт с третьей по номиналу картой борда плюс флешдро,
+		которое входит в топ-3 по номиналу карты, образующее это флешдро
+		 (на основе номинала карты, образующей флешдро)
+	*/
+	return s.pocketPairLessBoardValuesCount(3) && s.isFDBetween(3, 3)
+}
+
+func findFD2NutsFD(s *Selector) bool {
+	/*
+		fd_2nd_nuts_fd
+		Второе флешдро по силе флешдро, которое может быть на доске (сила определяется по старшей карте на руке)
+	*/
+	return s.isFDBetween(2, 2)
+}
+
+func findFD3NutsFD(s *Selector) bool {
+	/*
+		fd_3d_nuts_fd
+		Третье флешдро по силе флешдро, которое может быть на доске (сила определяется по старшей карте на руке)
+	*/
+	return s.isFDBetween(3, 3)
+}
+
+func findOESDNuts(s *Selector) bool {
+	/*
+		oesd_nuts
+		Двухстороннее Стритдро, для составления стрита которому необходима одна карта и
+		используются обе карманные карты и по номиналу - это наивысшее возможное стритдро из всех
+	*/
+	if !s.handTwoWaySD() {
+		return false
+	}
+	if s.board.maxOrderLen == 4 {
+		return false
+	}
+	if s.BoardSDWith(s.firstCard()) || s.BoardSDWith(s.secondCard()) {
+		return false
+	}
+	if s.board.maxOrderLen == 2 {
+		if s.board.maxOrderIdx <= 8 {
+			return s.total.maxOrderIdx == s.board.maxOrderIdx
+		} else {
+			return s.total.maxOrderIdx == 8
+		}
+	} else {
+		top2SDIndex := 0
+		for i := 12; i >= 4; i-- {
+			if s.board.values[i] != 0 {
+				continue
+			}
+			handCards := 2
+			for j := i - 1; j > i-5; j-- {
+				if j < 0 {
+					j = 12
+				}
+				if s.board.values[j] == 0 {
+					handCards--
+				}
+				if j == 12 {
+					break
+				}
+			}
+			if handCards != 0 {
+				continue
+			}
+			top2SDIndex = i
+			break
+		}
+		if top2SDIndex == 0 {
+			panic("top2SDIndex == 0") // TODO Debug only
+		}
+		return s.total.downStairLen(uint8(top2SDIndex)) == 4
+	}
+}
+
+func findGutShotNuts(s *Selector) bool {
+	/*
+		gutshot_nuts
+		стритдро, для составления стрита которому поможет карта только одного номинала, имеющее хотя бы 1 карту выше всех карт борда
+		стритдро на одну карту, которая выше всех карт борда и карманные карты, обе из которых выше карт борда
+	*/
+	first := s.gutShot(s.firstCard()) && s.firstCard().Value() > s.board.maxValue
+	second := s.gutShot(s.secondCard()) && s.secondCard().Value() > s.board.maxValue
+	return (first || second) && s.hand.minValue >= s.board.maxValue
+}
+
+func findGutShotOvercard(s *Selector) bool {
+	/*
+		gutshot_overcard
+		стритдро, для составления стрита которому поможет карта только одного номинала, имеющее хотя бы 1 карту выше всех карт борда
+		стритдро на одну карту, которая выше всех карт борда и карманные карты, одна из которых выше карт борда
+	*/
+	first := s.gutShot(s.firstCard()) && s.firstCard().Value() > s.board.maxValue
+	second := s.gutShot(s.secondCard()) && s.secondCard().Value() > s.board.maxValue
+	return (first || second) && s.hand.maxValue >= s.board.maxValue
 }
