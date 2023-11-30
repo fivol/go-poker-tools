@@ -745,12 +745,22 @@ func TestCombinations(t *testing.T) {
 		100: {"good_oesd"},
 		110: {"high_flush_j"},
 	}
+	skipCombosAllTests := []Comb{
+		"high_overpair_fd",
+		"tp_fd_nuts_fd",
+		"pocket_tp_2_fd_1_3_nuts",
+		"2nd_fd_1_3_nuts",
+		"pocket_between_2_3_fd_2_3_nuts",
+		"3d_hands_fd_2_3_nuts",
+		"fd_2nd_3d_nuts_fd",
+	}
 	allCombos := GetAllCombos()
 	for i, testCase := range table {
 		hand := types.ParseHand(testCase.hand)
 		board := types.ParseBoard(testCase.board)
 		trueComb := testCase.comb
 		combos := subCombos(allCombos, skipCombos[i])
+		combos = subCombos(combos, skipCombosAllTests)
 		extractors := GetExtractors(combos)
 		comb := GetCombinations(board, hand, extractors)
 		if comb != Comb(trueComb) {

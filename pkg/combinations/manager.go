@@ -32,7 +32,7 @@ var combinations = []ExtractorWithName{
 	{findOverpairFD2Nuts, "high_overpair_fd_2nuts"},
 	{findOverpairFD3Nuts, "high_overpair_fd_3nuts"},
 	{findOverpairFD4Nuts, "high_overpair_fd_4nuts"},
-	// {findHighOverPairFD, "high_overpair_fd"},
+	{findHighOverPairFD, "high_overpair_fd"}, // old
 	{findLowOverPairFD, "low_overpair_fd"},
 	{findOverPairFD, "overpair_fd"},
 	{findOverPairOESD, "overpair_oesd"},
@@ -40,7 +40,7 @@ var combinations = []ExtractorWithName{
 	{findHighOverPair, "high_overpair"},
 	{findLowOverPair, "low_overpair"},
 	{findOverPair, "overpair"},
-	// {findTPFDNutsFd, "tp_fd_nuts_fd"},
+	{findTPFDNutsFd, "tp_fd_nuts_fd"}, // old
 	{findTPFDNuts, "tp_fd_nuts"},
 	{findTPFD2Nuts, "tp_fd_2nuts"},
 	{findTPFD3Nuts, "tp_fd_3nuts"},
@@ -56,7 +56,7 @@ var combinations = []ExtractorWithName{
 	{findPocketTP2FD2Nuts, "pocket_tp_2_fd_2_nuts"},
 	{findPocketTP2FD3Nuts, "pocket_tp_2_fd_3_nuts"},
 	{findPocketTP2FD4Nuts, "pocket_tp_2_fd_4_nuts"},
-	// {findPocketTP2FD13Nuts, "pocket_tp_2_fd_1_3_nuts"},
+	{findPocketTP2FD13Nuts, "pocket_tp_2_fd_1_3_nuts"}, // old
 	{findPocketTP2FD, "pocket_tp_2_fd"},
 	{findPocketTP2OESD, "pocket_tp_2_oesd"},
 	{findPocketTP2GSH, "pocket_tp_2_gsh"},
@@ -64,7 +64,7 @@ var combinations = []ExtractorWithName{
 	{find2FDNuts, "2nd_fd_nuts"},
 	{find2FD2Nuts, "2nd_fd_2_nuts"},
 	{find2FD3Nuts, "2nd_fd_3_nuts"},
-	// {findSecondFD13Nuts, "2nd_fd_1_3_nuts"},
+	{findSecondFD13Nuts, "2nd_fd_1_3_nuts"}, // old
 	{findFdOESD2Cards, "fd_oesd_fd_2_cards"},
 	{findGutShotFD2Cards, "fd_gsh_fd_2_cards"},
 	{findFDOESDFD1Card, "fd_oesd_fd_1_card"},
@@ -76,7 +76,7 @@ var combinations = []ExtractorWithName{
 	{find2ndBDFDNuts, "2nd_bdfd_nuts"},
 	{findSecond, "2nd"},
 	{findPocketBetween23FDNuts, "pocket_between_2_3_fd_nuts"},
-	// {findPocketBetween23FD23Nuts, "pocket_between_2_3_fd_2_3_nuts"},
+	{findPocketBetween23FD23Nuts, "pocket_between_2_3_fd_2_3_nuts"}, // old
 	{findPocketBetween23FD2Nuts, "pocket_between_2_3_fd_2_nuts"},
 	{findPocketBetween23FD3Nuts, "pocket_between_2_3_fd_3_nuts"},
 	{findPocketBetween23FD4Nuts, "pocket_between_2_3_fd_4_nuts"},
@@ -87,7 +87,7 @@ var combinations = []ExtractorWithName{
 	{find3dHandsFDNuts, "3d_hands_fd_nuts"},
 	{find3dHandsFD2Nuts, "3d_hands_fd_2_nuts"},
 	{find3dHandsFD3Nuts, "3d_hands_fd_3_nuts"},
-	// {find3dHandsFD23Nuts, "3d_hands_fd_2_3_nuts"},
+	{find3dHandsFD23Nuts, "3d_hands_fd_2_3_nuts"}, // old
 	{find3dHandsFD4Nuts, "3d_hands_fd_4_nuts"},
 	{find3dHandsFD, "3d_hands_fd"},
 	{find3dHandsOESD, "3d_hands_oesd"},
@@ -98,7 +98,7 @@ var combinations = []ExtractorWithName{
 	{findFDNutsFD, "fd_nuts_fd"},
 	{findFD2NutsFD, "fd_2nd_nuts_fd"},
 	{findFD3NutsFD, "fd_3d_nuts_fd"},
-	// {findFD2nd3dNutsFD, "fd_2nd_3d_nuts_fd"},
+	{findFD2nd3dNutsFD, "fd_2nd_3d_nuts_fd"}, // old
 	{findFD1nd3dNutsFD, "fd_1st_3d_nuts_fd"},
 	{findFD4NutsFD, "fd_4_nuts_fd"},
 	{findFD, "fd"},
