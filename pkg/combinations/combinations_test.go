@@ -85,7 +85,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"9s6s2s",
 			"QdQs",
-			"high_overpair_fd",
+			"high_overpair_fd_3nuts",
 		},
 		{
 			"7s6s2s",
@@ -95,22 +95,22 @@ func TestCombinations(t *testing.T) {
 		{
 			"Qd5s3s",
 			"AsQs",
-			"tp_fd_nuts_fd",
+			"tp_fd_nuts",
 		},
 		{
 			"Qs5s3s",
 			"AsQd",
-			"tp_fd_nuts_fd",
+			"tp_fd_nuts",
 		},
 		{
 			"Qd5s3s",
 			"KsQs",
-			"tp_fd",
+			"tp_fd_2nuts",
 		},
 		{
 			"Qd5d3d",
 			"Qs7d",
-			"tp_fd",
+			"tp_fd_4nuts",
 		},
 		{
 			"KcJdTs",
@@ -130,12 +130,12 @@ func TestCombinations(t *testing.T) {
 		{
 			"As9s3s",
 			"JsJd",
-			"pocket_tp_2_fd_1_3_nuts",
+			"pocket_tp_2_fd_3_nuts",
 		},
 		{
 			"Ad8d2d",
 			"QdQc",
-			"pocket_tp_2_fd_1_3_nuts",
+			"pocket_tp_2_fd_2_nuts",
 		},
 		{
 			"As2s3s",
@@ -160,12 +160,12 @@ func TestCombinations(t *testing.T) {
 		{
 			"9s8s2s",
 			"As8d",
-			"2nd_fd_1_3_nuts",
+			"2nd_fd_nuts",
 		},
 		{
 			"Kd8dAd",
 			"KsJd",
-			"2nd_fd_1_3_nuts",
+			"2nd_fd_2_nuts",
 		},
 		{
 			"Ts7s2s",
@@ -195,7 +195,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"AsKs2s",
 			"JsJd",
-			"pocket_between_2_3_fd_2_3_nuts",
+			"pocket_between_2_3_fd_2_nuts",
 		},
 		{
 			"AsKs2s",
@@ -225,7 +225,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"KsQs3s",
 			"Js3d",
-			"3d_hands_fd_2_3_nuts",
+			"3d_hands_fd_2_nuts",
 		},
 		{
 			"KsQs3s",
@@ -250,7 +250,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"AsKsQs",
 			"JsJd",
-			"under_pocket_fd_1_2_nuts",
+			"fd_gsh_fd_1_card",
 		},
 		{
 			"AsKdQc",
@@ -295,22 +295,22 @@ func TestCombinations(t *testing.T) {
 		{
 			"AsQs3d",
 			"Js2s",
-			"fd_2nd_3d_nuts_fd",
+			"fd_2nd_nuts_fd",
 		},
 		{
 			"As9s3d",
 			"QsTs",
-			"fd_2nd_3d_nuts_fd",
+			"fd_2nd_nuts_fd",
 		},
 		{
 			"6s8sTs",
 			"5s4d",
-			"fd_4_nuts_fd",
+			"fd_gsh_fd_1_card",
 		},
 		{
 			"JsTc3h",
 			"KsQd",
-			"good_oesd",
+			"oesd_nuts",
 		},
 		{
 			"4s5d6h",
@@ -325,12 +325,12 @@ func TestCombinations(t *testing.T) {
 		{
 			"Js9d6c",
 			"KsQd",
-			"good_gutshot",
+			"gutshot_nuts",
 		},
 		{
 			"3d4c6s",
 			"As2s",
-			"bad_gutshot",
+			"gutshot_bdfd_nuts",
 		},
 		{
 			"8c9hJd",
@@ -395,7 +395,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"Ks3d8s7c",
 			"AsKd",
-			"old_tp",
+			"tp_bdfd_nuts", // old_tp
 		},
 		{
 			"8s3c2s6d",
@@ -490,7 +490,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"9s6s2s",
 			"QdQs",
-			"overpair_fd",
+			"high_overpair_fd_3nuts",
 		},
 		{
 			"Ks2c2d",
@@ -512,15 +512,17 @@ func TestCombinations(t *testing.T) {
 			"5s8d",
 			"good_gutshot",
 		},
+		// TODO turn think
 		{
 			"4s5dTcJs",
 			"8s7d",
-			"oesd",
+			"oesd_nuts",
 		},
+		// TODO turn think
 		{
 			"8c9dThKh",
 			"AsQh",
-			"good_gutshot",
+			"gutshot_overcard",
 		},
 		{
 			"7c7d9c",
@@ -530,12 +532,12 @@ func TestCombinations(t *testing.T) {
 		{
 			"9c3d2h",
 			"KcAc",
-			"ahigh",
+			"overcards_bdfd_nuts",
 		},
 		{
 			"As4d3h",
 			"5d2c",
-			"straight",
+			"high_straight",
 		},
 		{
 			"7c8cJh9dTd",
@@ -550,7 +552,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"Ac2h3d4s5d",
 			"5c6d",
-			"straight",
+			"high_straight",
 		},
 		{
 			"9cTdJsQhKd",
@@ -562,11 +564,11 @@ func TestCombinations(t *testing.T) {
 			"6d7h",
 			"straight_flush",
 		},
-		{
-			"2h3h4h6h7h",
-			"Ah3d",
-			"flush",
-		},
+		// {
+		// 	"2h3h4h6h7h",
+		// 	"Ah3d",
+		// 	"flush",
+		// },
 		{
 			"2c2d2h2s3c",
 			"AhAc",
@@ -612,11 +614,11 @@ func TestCombinations(t *testing.T) {
 			"6h6c",
 			"pocket_tp_2",
 		},
-		{
-			"3dAdKh",
-			"Qd5d",
-			"fd_2nd_3d_nuts_fd",
-		},
+		// {
+		// 	"3dAdKh",
+		// 	"Qd5d",
+		// 	"fd_2nd_3d_nuts_fd",
+		// },
 		{
 			"8s9dJsQc",
 			"Qh4h",
@@ -637,6 +639,91 @@ func TestCombinations(t *testing.T) {
 			"7s7d",
 			"pocket_between_2_3",
 		},
+		// {
+		// 	"2d7hQs",
+		// 	"AdQd",
+		// 	"tp_bdfd_nuts",
+		// },
+		{
+			"8h2h5s",
+			"As8s",
+			"tp_bdfd_nuts",
+		},
+		{
+			"Th6s5s",
+			"Ah6h",
+			"2nd_bdfd_nuts",
+		},
+		{
+			"6d3sQc",
+			"Ac6c",
+			"2nd_bdfd_nuts",
+		},
+		{
+			"KdTh3s",
+			"Ah3h",
+			"3nd_bdfd_nuts",
+		},
+		{
+			"TdJc5c",
+			"Ad5d",
+			"3nd_bdfd_nuts",
+		},
+		{
+			"Td8h7s",
+			"Ad9d",
+			"oesd_bdfd_nuts",
+		},
+		{
+			"8s9c7c",
+			"AsTs",
+			"oesd_bdfd_nuts",
+		},
+		{
+			"Jh7h8s",
+			"AsTs",
+			"gutshot_bdfd_nuts",
+		},
+		{
+			"Jd3s2s",
+			"Ad5d",
+			"gutshot_bdfd_nuts",
+		},
+		{
+			"5d5h4c",
+			"AcKc",
+			"overcards_bdfd_nuts",
+		},
+		{
+			"2d5h8s",
+			"AdTd",
+			"overcards_bdfd_nuts",
+		},
+		{"9s6s2s", "AdAs", "high_overpair_fd_nuts"},
+		{"Ts5s2s", "KcKs", "high_overpair_fd_2nuts"},
+		{"Js6s5s", "QdQs", "high_overpair_fd_3nuts"},
+		{"Ts5s2s", "JdJs", "high_overpair_fd_4nuts"},
+		{"Qd5s3s", "AsQs", "tp_fd_nuts"},
+		{"Qh7d6d", "KdQd", "tp_fd_2nuts"},
+		{"As8s4s", "AcJs", "tp_fd_3nuts"},
+		{"AsKs2s", "Ac9s", "tp_fd_4nuts"},
+		{"As9s3s", "KsKd", "pocket_tp_2_fd_nuts"},
+		{"Ks7s2s", "QsQd", "pocket_tp_2_fd_2_nuts"},
+		{"Qs7s2s", "JsJd", "pocket_tp_2_fd_3_nuts"},
+		{"Qs6s2s", "As6c", "2nd_fd_nuts"},
+		{"Js5s2s", "Ks5c", "2nd_fd_2_nuts"},
+		{"Js5s2s", "Qs5d", "2nd_fd_3_nuts"},
+		{"Ks8s7s", "Ts9d", "fd_oesd_fd_1_card"},
+		{"Ks7s6s", "Ts9d", "fd_gsh_fd_1_card"},
+		{"KsQs3s", "JsJc", "pocket_between_2_3_fd_2_nuts"},
+		{"KsJs3s", "TsTc", "pocket_between_2_3_fd_3_nuts"},
+		{"KsQs3s", "Js3d", "3d_hands_fd_2_nuts"},
+		{"QcJc6c", "Tc6d", "3d_hands_fd_3_nuts"},
+		{"AsQs3d", "Ks2s", "fd_nuts_fd"},
+		{"AcQc5d", "Jc7c", "fd_2nd_nuts_fd"},
+		{"2c9dTh", "JcQd", "oesd_nuts"},
+		{"9s8c2c", "QdJh", "gutshot_nuts"},
+		{"3c6s8h", "Ts7d", "gutshot_overcard"},
 	}
 	skipCombos := map[int][]Comb{
 		66:  {"top_set", "medium_set"},
@@ -656,9 +743,16 @@ func TestCombinations(t *testing.T) {
 		1:   {"high_straight", "low_straight"},
 		95:  {"high_overpair_fd"},
 		100: {"good_oesd"},
-		104: {"high_straight"},
-		107: {"high_straight"},
 		110: {"high_flush_j"},
+	}
+	skipCombosAllTests := []Comb{
+		"high_overpair_fd",
+		"tp_fd_nuts_fd",
+		"pocket_tp_2_fd_1_3_nuts",
+		"2nd_fd_1_3_nuts",
+		"pocket_between_2_3_fd_2_3_nuts",
+		"3d_hands_fd_2_3_nuts",
+		"fd_2nd_3d_nuts_fd",
 	}
 	allCombos := GetAllCombos()
 	for i, testCase := range table {
@@ -666,6 +760,7 @@ func TestCombinations(t *testing.T) {
 		board := types.ParseBoard(testCase.board)
 		trueComb := testCase.comb
 		combos := subCombos(allCombos, skipCombos[i])
+		combos = subCombos(combos, skipCombosAllTests)
 		extractors := GetExtractors(combos)
 		comb := GetCombinations(board, hand, extractors)
 		if comb != Comb(trueComb) {

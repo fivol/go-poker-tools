@@ -6,6 +6,8 @@ var suitNames = [4]uint8{'s', 'h', 'd', 'c'}
 var valueNames = [13]uint8{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
 
 type Card int16
+type Value uint8
+type Suit uint8
 
 func IsDistinct(cards ...Card) bool {
 	var passed [52]bool

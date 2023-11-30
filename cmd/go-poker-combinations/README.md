@@ -1,5 +1,5 @@
 # Poker combinations by board and list of hands
-
+[Description](https://docs.google.com/spreadsheets/d/1-7baPOJLRsCriNO-va8sd9UhWH8Awq0kzYU66Hf9s4s/edit#gid=0) of all combinations
 
 ### Build
 ```
