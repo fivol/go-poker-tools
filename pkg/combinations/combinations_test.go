@@ -724,6 +724,8 @@ func TestCombinations(t *testing.T) {
 		{"2c9dTh", "JcQd", "oesd_nuts"},
 		{"9s8c2c", "QdJh", "gutshot_nuts"},
 		{"3c6s8h", "Ts7d", "gutshot_overcard"},
+		{"4dTc7s", "Jh9h", "gutshot_overcard"},
+		{"AcJs6c", "AsTs", "tp_bdfd_nuts"},
 	}
 	skipCombos := map[int][]Comb{
 		66:  {"top_set", "medium_set"},
