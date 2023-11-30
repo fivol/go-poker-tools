@@ -114,9 +114,9 @@ var combinations = []ExtractorWithName{
 	{findBadGutShot, "bad_gutshot"},
 	{findGutShot, "gutshot"},
 	{findUnderPocket, "under_pocket"},
+	{findOverCardsBDFDNuts, "overcards_bdfd_nuts"},
 	{findAHigh, "ahigh"},
 	{findTopCards, "top_cards"},
-	{findOverCardsBDFDNuts, "overcards_bdfd_nuts"},
 	{findOverCards, "overcards"},
 	{findNomade, "nomade"},
 }

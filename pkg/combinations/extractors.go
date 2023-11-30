@@ -1338,7 +1338,7 @@ func find3dHandsFD2Nuts(s *Selector) bool {
 		которое входит в топ-2 по номиналу карты, образующее это флешдро
 		 (на основе номинала карты, образующей флешдро)
 	*/
-	return s.pocketPairLessBoardValuesCount(3) && s.isFDBetween(1, 2)
+	return s.pairWithBoardIdx() == 3 && s.isFDBetween(1, 2)
 }
 
 func find3dHandsFD3Nuts(s *Selector) bool {
@@ -1348,7 +1348,7 @@ func find3dHandsFD3Nuts(s *Selector) bool {
 		которое входит в топ-3 по номиналу карты, образующее это флешдро
 		 (на основе номинала карты, образующей флешдро)
 	*/
-	return s.pocketPairLessBoardValuesCount(3) && s.isFDBetween(3, 3)
+	return s.pairWithBoardIdx() == 3 && s.isFDBetween(3, 3)
 }
 
 func findFD2NutsFD(s *Selector) bool {

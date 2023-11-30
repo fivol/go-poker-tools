@@ -225,7 +225,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"KsQs3s",
 			"Js3d",
-			"3d_hands_fd",
+			"3d_hands_fd_2_nuts",
 		},
 		{
 			"KsQs3s",
@@ -327,11 +327,11 @@ func TestCombinations(t *testing.T) {
 			"KsQd",
 			"gutshot_nuts",
 		},
-		// {
-		// 	"3d4c6s",
-		// 	"As2s",
-		// 	"bad_gutshot",
-		// },
+		{
+			"3d4c6s",
+			"As2s",
+			"gutshot_bdfd_nuts",
+		},
 		{
 			"8c9hJd",
 			"As7d",
@@ -342,16 +342,16 @@ func TestCombinations(t *testing.T) {
 			"5s4s",
 			"straight_flush",
 		},
-		// {
-		// 	"Ac2hKc",
-		// 	"2s2d",
-		// 	"set",
-		// },
-		// {
-		// 	"3c4d7h",
-		// 	"JsJd",
-		// 	"overpair",
-		// },
+		{
+			"Ac2hKc",
+			"2s2d",
+			"set",
+		},
+		{
+			"3c4d7h",
+			"JsJd",
+			"overpair",
+		},
 		{
 			"QsTd2c",
 			"KcJd",
@@ -395,7 +395,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"Ks3d8s7c",
 			"AsKd",
-			"old_tp",
+			"tp_bdfd_nuts", // old_tp
 		},
 		{
 			"8s3c2s6d",
@@ -513,17 +513,17 @@ func TestCombinations(t *testing.T) {
 			"good_gutshot",
 		},
 		// TODO turn think
-		// {
-		// 	"4s5dTcJs",
-		// 	"8s7d",
-		// 	"oesd_nuts",
-		// },
+		{
+			"4s5dTcJs",
+			"8s7d",
+			"oesd_nuts",
+		},
 		// TODO turn think
-		// {
-		// 	"8c9dThKh",
-		// 	"AsQh",
-		// 	"gutshot_overcard",
-		// },
+		{
+			"8c9dThKh",
+			"AsQh",
+			"gutshot_overcard",
+		},
 		{
 			"7c7d9c",
 			"4s4d",
@@ -532,7 +532,7 @@ func TestCombinations(t *testing.T) {
 		{
 			"9c3d2h",
 			"KcAc",
-			"ahigh",
+			"overcards_bdfd_nuts",
 		},
 		{
 			"As4d3h",
@@ -719,8 +719,8 @@ func TestCombinations(t *testing.T) {
 		{"KsJs3s", "TsTc", "pocket_between_2_3_fd_3_nuts"},
 		{"KsQs3s", "Js3d", "3d_hands_fd_2_nuts"},
 		{"QcJc6c", "Tc6d", "3d_hands_fd_3_nuts"},
-		{"AsQs3d", "Ks2s", "fd_2nd_nuts_fd"},
-		{"AcQc5d", "Jc7c", "fd_3d_nuts_fd"},
+		{"AsQs3d", "Ks2s", "fd_nuts_fd"},
+		{"AcQc5d", "Jc7c", "fd_2nd_nuts_fd"},
 		{"2c9dTh", "JcQd", "oesd_nuts"},
 		{"9s8c2c", "QdJh", "gutshot_nuts"},
 		{"3c6s8h", "Ts7d", "gutshot_overcard"},
@@ -743,8 +743,6 @@ func TestCombinations(t *testing.T) {
 		1:   {"high_straight", "low_straight"},
 		95:  {"high_overpair_fd"},
 		100: {"good_oesd"},
-		// 104: {"high_straight"},
-		107: {"high_straight"},
 		110: {"high_flush_j"},
 	}
 	allCombos := GetAllCombos()
