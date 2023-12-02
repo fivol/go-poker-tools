@@ -235,14 +235,28 @@ func (s *Selector) getFD() (bool, FD) {
 	}
 	return true, fd1
 }
-func (s *Selector) upGutshotWhole(card types.Card) bool {
+func (s *Selector) upGutshotWhole(card types.Card, first bool) bool {
 	down := s.total.downStairLen(card.Value())
 	up := s.total.upStairLen(card.Value())
+	if card.Value() == 12 {
+		if first {
+			return up+s.total.upStairLen(up) == 4 || s.upGutshotWhole(card, false)
+		}
+		down = 1
+	}
 	size := up + down - 1
 	if size >= 4 {
 		return false
 	}
-	return s.total.upStairLen(card.Value()+up+1)+size == 4
+	up2Stair := s.total.upStairLen(card.Value() + up + 1)
+	if card.Value()+up+1 == 12 {
+		if s.total.values[12] != 0 {
+			up2Stair = 1
+		} else {
+			up2Stair = 0
+		}
+	}
+	return up2Stair+size == 4
 }
 func (ci *cardsInfo) getStraight() (bool, uint8) {
 	if ci.maxOrderLen < 5 {
@@ -253,14 +267,25 @@ func (ci *cardsInfo) getStraight() (bool, uint8) {
 func (s *Selector) downGutshotWhole(card types.Card) bool {
 	down := s.total.downStairLen(card.Value())
 	up := s.total.upStairLen(card.Value())
+	if card.Value() == 12 {
+		up = 1
+	}
 	size := up + down - 1
 	if size >= 4 {
 		return false
 	}
-	return s.total.downStairLen(card.Value()-down-1)+size >= 4
+	down2Len := s.total.downStairLen(card.Value() - down - 1)
+	if card.Value()-down == 0 {
+		if s.total.values[12] != 0 {
+			down2Len = 1
+		} else {
+			down2Len = 0
+		}
+	}
+	return down2Len+size >= 4
 }
 func (s *Selector) gutShotWhole(card types.Card) bool {
-	return s.upGutshotWhole(card) || s.downGutshotWhole(card)
+	return s.upGutshotWhole(card, true) || s.downGutshotWhole(card)
 }
 func (s *Selector) HasFlush(card types.Card) bool {
 	if s.total.suits[card.Suit()] < 5 {
@@ -326,20 +351,19 @@ func (s *Selector) isTopBDFD() bool {
 	/*
 		top_bdfd
 		сильнейшее бекдорное флешдро, которое может быть на этой доске
-		top fdbd - это когда при выложенном флопе есть 3 карты одной масти 
-		(2 у нас на руках и одна на флопе или 2 на флопе и 1 на руках) 
-		и одна из карт у нас на руках является наивысшей для составления флеша 
+		top fdbd - это когда при выложенном флопе есть 3 карты одной масти
+		(2 у нас на руках и одна на флопе или 2 на флопе и 1 на руках)
+		и одна из карт у нас на руках является наивысшей для составления флеша
 		(As на доске 8s7s3c, Ks на доске As8s3c)
 	*/
-	
-	for i := 0; i < 4; i ++ {
+	for i := 0; i < 4; i++ {
 		if s.total.suits[i] != 3 {
 			continue
 		}
 		if s.hand.suits[i] == 0 {
 			continue
 		}
-		for value := 12; value >= 0; value -- {
+		for value := 12; value >= 0; value-- {
 			if !s.board.chart[i][value] {
 				return s.hand.chart[i][value]
 			}
@@ -369,12 +393,9 @@ func (ci *cardsInfo) upStairLen(value uint8) uint8 {
 	if value > 12 {
 		return 0
 	}
-	if value < 0 {
-		return 0
-	}
 	if value == 12 {
 		if ci.values[12] > 0 {
-			return 1
+			return ci.upStairLen(0) + 1
 		}
 		return 0
 	}
@@ -393,9 +414,6 @@ func (ci *cardsInfo) isOpenDownStair(value uint8) bool {
 }
 func (ci *cardsInfo) downStairLen(value uint8) uint8 {
 	if value > 12 {
-		return 0
-	}
-	if value < 0 {
 		return 0
 	}
 	return ci.stairsDownLen[value]
@@ -1119,8 +1137,8 @@ func findBadGutShot(s *Selector) bool {
 func findTPBDFDNuts(s *Selector) bool {
 	/*
 		tp_bdfd_nuts
-		Пара с высшей картой со стола и сильнейшее бекдорное флешдро 
-		(то есть 2 карты одной масти у нас и 1 карта такой же масти на борде), 
+		Пара с высшей картой со стола и сильнейшее бекдорное флешдро
+		(то есть 2 карты одной масти у нас и 1 карта такой же масти на борде),
 		которое может быть на этой доске
 	*/
 	return s.isTPBDFDNutsN(1)
